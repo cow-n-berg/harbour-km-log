@@ -15,11 +15,16 @@ ApplicationWindow
     property bool   debug      : false
 
     // Settings
-    property bool useISO       : DB.getSetting( "coverShowAppName", false )
+    property bool coverShowAppName        : DB.getSetting( "coverShowAppName", false )
+    property bool deleteDatabase          : DB.getSetting( "deleteDatabase",   false )
+    property bool hideArchivedTrips       : DB.getSetting( "hideArchivedTrips", false )
+
+    property var tripId
+    property var projId
 
     Component.onCompleted: { DB.openDatabase() }
 
-    initialPage: Component { TripsPage { } }
+    initialPage: Component { TripShowPage { } }
     cover: Qt.resolvedUrl("pages/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
 

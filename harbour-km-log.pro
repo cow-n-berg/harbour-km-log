@@ -15,9 +15,6 @@ TARGET = harbour-km-log
 CONFIG += sailfishapp_qml
 
 DISTFILES += qml/harbour-km-log.qml \
-    qml/cover/CoverPage.qml \
-    qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
     rpm/harbour-km-log.changes.in \
     rpm/harbour-km-log.changes.run.in \
     rpm/harbour-km-log.spec \

@@ -1,7 +1,7 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
-import "../scripts/ExternalLinks.js" as ExternalLinks
-import "../scripts/TextFunctions.js" as TF
+//import "../scripts/ExternalLinks.js" as ExternalLinks
+//import "../scripts/TextFunctions.js" as TF
 
 Page {
     id: aboutPage
@@ -9,9 +9,9 @@ Page {
     property string author: "Rob Kouwenberg"
     property string devMail: "sailfishapp@cow-n-berg.nl"
     property url devGithub: "https://github.com/cow-n-berg"
-    property url repoGithub: "https://github.com/cow-n-berg/harbour-multi-coords"
-    property string mailSubjectHeader: "[SailfishOS][GMFS " + generic.version + "] "
-    property string mailErrorSubjectHeader: "[SailfishOS][GMFS " + generic.version + "][Error] "
+    property url repoGithub: "https://github.com/cow-n-berg/harbour-km-log"
+    property string mailSubjectHeader: "[SailfishOS][km log " + generic.version + "] "
+    property string mailErrorSubjectHeader: "[SailfishOS][km log " + generic.version + "][Error] "
     property string mailBodyHeader: "Hey Rob, "
 
 //    allowedOrientations: Orientation.Landscape
