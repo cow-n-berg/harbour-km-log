@@ -57,12 +57,11 @@ Dialog {
             checkTarg.checked = false
             txtPric.text      = ""
             txtTarg.text      = ""
-            typeBox.value     = "walk"
-//            typeBox.currentIndex = 0
+            typeBox.value     = "bike"
             colorIndicator.color = "#777777"
         }
         else {
-            var proj = Database.getOneProj(project)
+            var proj = Database.getOneProj(recId)
             console.log("This project: " + JSON.stringify(proj))
             addNewProj   = false
             txtProj.text      = proj.project
@@ -76,146 +75,134 @@ Dialog {
         }
     }
 
+    DialogHeader {
+        id: pageHeader
+        title: (addNewProj ? "Add proj" : "Edit proj")
+    }
+
     Component.onCompleted: getThisProj(recId);
 
-    SilicaFlickable {
-        id: projView
-
-        PageHeader {
-            id: pageHeader
-            title: (addNewProj ? "Add proj" : "Edit proj")
-        }
-
-        VerticalScrollDecorator {}
-
+    Column {
+        id: column
+        width: parent.width
         anchors {
-            fill: parent
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
+            top: pageHeader.bottom
+            margins: 0
         }
-        contentHeight: column.height // + Theme.itemSizeMedium
 
-        Column {
-            id: column
+        TextField {
+            id: txtProj
+            focus: true
             width: parent.width
-            anchors {
-                top: pageHeader.bottom
-                margins: 0
-            }
-
-            TextField {
-                id: txtProj
-                focus: true
-                width: parent.width
-                label: qsTr("Project")
-                placeholderText: label
-                placeholderColor: Theme.secondaryColor
-                color: Theme.primaryColor
-                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.onClicked: checkInvc.focus = true
-            }
-
-            BackgroundItem {
-                id: colorPickerButton
-                Row {
-                    x: Theme.horizontalPageMargin
-                    height: parent.height
-                    spacing: Theme.paddingMedium
-                    Rectangle {
-                        id: colorIndicator
-
-                        width: height
-                        height: parent.height
-                        color: "#777777"
-                    }
-                    Label {
-                        text: "Color"
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
-                onClicked: {
-                    var obj = pageStack.animatorPush("Sailfish.Silica.ColorPickerPage", { color: colorIndicator.color })
-                    obj.pageCompleted.connect(function(page) {
-                        page.colorClicked.connect(function(color) {
-                            colorIndicator.color = color
-                            console.log("You selected:", color)
-                            pageStack.pop()
-                        })
-                    })
-                }
-                Component {
-                    id: colorPickerPage
-                    ColorPickerPage {}
-                }
-            }
-
-            ComboBox {
-                id: typeBox
-                label: "Type of project"
-                menu: ContextMenu {
-                    MenuItem { text: "bike" }
-                    MenuItem { text: "car" }
-                    MenuItem { text: "run" }
-                    MenuItem { text: "walk" }
-                }
-            }
-
-            SectionHeader {
-                text: "Option: priced per km?"
-                font.pixelSize: Theme.fontSizeExtraSmall
-            }
-
-            TextSwitch {
-                id: checkInvc
-                text: (checked ? qsTr("Yes, pricing is on") : qsTr("No pricing") )
-                description: "Priced per kilometer or not?"
-                onCheckedChanged: {
-                    txtPric.focus = true
-                }
-            }
-
-            TextField {
-                id: txtPric
-                width: parent.width
-                label: qsTr("Price per kilometer")
-                placeholderText: label
-                placeholderColor: Theme.secondaryColor
-                color: Theme.primaryColor
-                enabled: checkInvc.checked
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.enabled: text.length > 0
-                EnterKey.onClicked: checkTarg.focus = true
-            }
-
-            SectionHeader {
-                text: "Option: a target to work towards?"
-                font.pixelSize: Theme.fontSizeExtraSmall
-            }
-
-            TextSwitch {
-                id: checkTarg
-                text: (checked ? qsTr("Yes, a target it is") : qsTr("No, serves another purpose") )
-                description: "Meant as a target to reach?"
-                onCheckedChanged: {
-                    txtTarg.focus = true
-                }
-            }
-
-            TextField {
-                id: txtTarg
-                width: parent.width
-                label: qsTr("Kilometer target")
-                placeholderText: label
-                placeholderColor: Theme.secondaryColor
-                color: Theme.primaryColor
-                enabled: checkTarg.checked
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                EnterKey.iconSource: "image://theme/icon-m-enter-close"
-                EnterKey.enabled: text.length > 0
-                EnterKey.onClicked: dialog.accept()
-            }
-
+            label: qsTr("Project")
+            placeholderText: label
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
+            EnterKey.iconSource: "image://theme/icon-m-enter-next"
+            EnterKey.onClicked: checkInvc.focus = true
         }
+
+        BackgroundItem {
+            id: colorPickerButton
+            Row {
+                x: Theme.horizontalPageMargin
+                height: parent.height
+                spacing: Theme.paddingMedium
+                Rectangle {
+                    id: colorIndicator
+
+                    width: height
+                    height: parent.height
+                    color: "#777777"
+                }
+                Label {
+                    text: "Color"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+            onClicked: {
+                var obj = pageStack.animatorPush("Sailfish.Silica.ColorPickerPage", { color: colorIndicator.color })
+                obj.pageCompleted.connect(function(page) {
+                    page.colorClicked.connect(function(color) {
+                        colorIndicator.color = color
+                        console.log("You selected:", color)
+                        pageStack.pop()
+                    })
+                })
+            }
+            Component {
+                id: colorPickerPage
+                ColorPickerPage {}
+            }
+        }
+
+        ComboBox {
+            id: typeBox
+            label: "Type of project"
+            menu: ContextMenu {
+                MenuItem { text: "bike" }
+                MenuItem { text: "car" }
+                MenuItem { text: "run" }
+                MenuItem { text: "walk" }
+            }
+        }
+
+        SectionHeader {
+            text: "Option: priced per km?"
+            font.pixelSize: Theme.fontSizeExtraSmall
+        }
+
+        TextSwitch {
+            id: checkInvc
+            text: (checked ? qsTr("Yes, pricing is on") : qsTr("No pricing") )
+            description: "Priced per kilometer or not?"
+            onCheckedChanged: {
+                txtPric.focus = true
+            }
+        }
+
+        TextField {
+            id: txtPric
+            width: parent.width
+            label: qsTr("Price per kilometer")
+            placeholderText: label
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
+            enabled: checkInvc.checked
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            EnterKey.iconSource: "image://theme/icon-m-enter-next"
+            EnterKey.enabled: text.length > 0
+            EnterKey.onClicked: checkTarg.focus = true
+        }
+
+        SectionHeader {
+            text: "Option: a target to work towards?"
+            font.pixelSize: Theme.fontSizeExtraSmall
+        }
+
+        TextSwitch {
+            id: checkTarg
+            text: (checked ? qsTr("Yes, a target it is") : qsTr("No, serves another purpose") )
+            description: "Meant as a target to reach?"
+            onCheckedChanged: {
+                txtTarg.focus = true
+            }
+        }
+
+        TextField {
+            id: txtTarg
+            width: parent.width
+            label: qsTr("Kilometer target")
+            placeholderText: label
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
+            enabled: checkTarg.checked
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            EnterKey.iconSource: "image://theme/icon-m-enter-close"
+            EnterKey.enabled: text.length > 0
+            EnterKey.onClicked: dialog.accept()
+        }
+
     }
 }
+

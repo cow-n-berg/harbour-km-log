@@ -87,134 +87,103 @@ Dialog {
         }
     }
 
+    DialogHeader {
+        id: pageHeader
+        title: (addNewTrip ? "Add trip" : "Edit trip")
+    }
+
     Component.onCompleted: prepareTrip(recId);
 
-    SilicaFlickable {
-        id: tripView
-
-        PageHeader {
-            id: pageHeader
-            title: (addNewTrip ? "Add trip" : "Edit trip")
-        }
-
-        VerticalScrollDecorator {}
-
+    Column {
+        id: column
+        width: parent.width
         anchors {
-            fill: parent
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
+            top: pageHeader.bottom
+            margins: 0
         }
-        contentHeight: column.height // + Theme.itemSizeMedium
 
-        Column {
-            id: column
-            width: parent.width
+        spacing: Theme.paddingSmall
+
+        IconButton {
+            id: modifyDateButton
+
+            width: Theme.iconSizeMedium
+            height: width
+
+            icon.source: "../images/calendar-icon.svg"
+
+            onClicked: {
+                console.log("modifyDateButton clicked")
+
+                var dialogDate = pageStack.push(pickerDate, { date: new Date(txtDate.text) })
+                dialogDate.accepted.connect(function() {
+                    console.log("You chose:", dialogDate.dateText)
+                    // use date, as dateText return varies
+                    txtDate.text = Qt.formatDateTime(new Date(dialogDate.date), "yyyy-MM-dd")
+                })
+            }
+
+            Component {
+                id: pickerDate
+                DatePickerDialog {}
+            }
+        }
+
+        TextField {
+            id: txtDate
+            focus: true
+            width: parent.width - modifyDateButton.width
             anchors {
-                top: pageHeader.bottom
-                margins: 0
+                margins: Theme.paddingMedium
+                left: modifyDateButton.right
             }
+            label: qsTr("Date")
+            placeholderText: label
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            EnterKey.iconSource: "image://theme/icon-m-enter-next"
+            EnterKey.onClicked: txtKilo.focus = true
+        }
 
-            spacing: Theme.paddingSmall
 
-            Row {
-                IconButton {
-                    id: modifyDateButton
-
-                    width: Theme.iconSizeMedium
-                    height: width
-//                    anchors: { right: parent.right }
-
-//                    readonly property bool showPress: (pressed && containsMouse) || modifyDateButtonPressTimer.running
-
-                    icon.source: "../images/calendar-icon.svg"
-//                        highlightColor: parent.showPress ? Theme.highlightColor : Theme.primaryColor
-
-//                    onPressedChanged: {
-//                        if (pressed) {
-//                            modifyDateButtonPressTimer.start()
-//                        }
-//                    }
-
-//                    onCanceled: modifyDateButtonPressTimer.stop()
-
-                    onClicked: {
-                        console.log("modifyDateButton clicked")
-
-                        var dialogDate = pageStack.push(pickerDate, { date: new Date(txtDate.text) })
-                        dialogDate.accepted.connect(function() {
-                            console.log("You chose:", dialogDate.dateText)
-                            // use date, as dateText return varies
-                            txtDate.text = Qt.formatDateTime(new Date(dialogDate.date), "yyyy-MM-dd")
-                        })
-                    }
-
-//                    Timer {
-//                        id: modifyDateButtonPressTimer
-//                        interval: 50
-//                    }
-
-                    Component {
-                        id: pickerDate
-                        DatePickerDialog {}
-                    }
-                }
-
-                TextField {
-                    id: txtDate
-                    focus: true
-                    width: parent.width - modifyDateButton.width
-                    anchors {
-                        margins: Theme.paddingMedium
-                        left: modifyDateButton.right
-                    }
-                    label: qsTr("Date")
-                    placeholderText: label
-                    placeholderColor: Theme.secondaryColor
-                    color: Theme.primaryColor
-                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                    EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                    EnterKey.onClicked: txtKilo.focus = true
-                }
-
-            }
-
-            TextField {
-                id: txtKilo
-                width: parent.width
-                label: qsTr("Kilometer")
-                placeholderText: label
-                placeholderColor: Theme.secondaryColor
-                color: Theme.primaryColor
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.enabled: text.length > 0
-                EnterKey.onClicked: txtDesc.focus = true
-            }
-            ComboBox {
-                id: boxProj
-                label: qsTr("Project")
+        TextField {
+            id: txtKilo
+            width: parent.width
+            label: qsTr("Kilometer")
+            placeholderText: label
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            EnterKey.iconSource: "image://theme/icon-m-enter-next"
+            EnterKey.enabled: text.length > 0
+            EnterKey.onClicked: txtDesc.focus = true
+        }
+        ComboBox {
+            id: boxProj
+            label: qsTr("Project")
 //                currentIndex: 1
-                menu: ContextMenu {
-                    Repeater {
-                        model: listModel
-                        MenuItem {
-                            text: project;
-                            onClicked: {
-                                console.log("ComboBox onClicked: " + project)
-                                proj = project
-                            }
+            menu: ContextMenu {
+                Repeater {
+                    model: listModel
+                    MenuItem {
+                        text: project;
+                        onClicked: {
+                            console.log("ComboBox onClicked: " + project)
+                            proj = project
                         }
                     }
                 }
             }
+        }
 
-            TextField {
-                id: txtDesc
-                width: parent.width
-                label: qsTr("Description")
-                placeholderText: label + " - " + qsTr("not mandatory")
-                placeholderColor: Theme.secondaryColor
-                color: Theme.primaryColor
+        TextField {
+            id: txtDesc
+            width: parent.width
+            label: qsTr("Description")
+            placeholderText: label + " - " + qsTr("not mandatory")
+            placeholderColor: Theme.secondaryColor
+            color: Theme.primaryColor
 //                EnterKey.iconSource: "image://theme/icon-m-enter-next"
 //                EnterKey.onClicked: txtProj.focus = true
 //            }
@@ -225,9 +194,9 @@ Dialog {
 //                placeholderText: label + " - " + qsTr("not mandatory")
 //                placeholderColor: Theme.secondaryColor
 //                color: Theme.primaryColor
-                EnterKey.iconSource: "image://theme/icon-m-enter-close"
-                EnterKey.onClicked: dialog.accept()
-            }
+            EnterKey.iconSource: "image://theme/icon-m-enter-close"
+            EnterKey.onClicked: dialog.accept()
         }
     }
 }
+
