@@ -58,25 +58,6 @@
     </message>
 </context>
 <context>
-    <name>CoverPage</name>
-    <message>
-        <source>No formula yet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Formula copied</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lat copied</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lon copied</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SettingsPage</name>
     <message>
         <source>Settings</source>
@@ -215,6 +196,14 @@ Cartesian system of The Netherlands</source>
     </message>
     <message>
         <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not mandatory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

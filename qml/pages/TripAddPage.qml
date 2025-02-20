@@ -8,23 +8,54 @@ Dialog {
 
     allowedOrientations: Orientation.All
 
-    property var tripId
+    property var recId
     property var callback
     property var template
-    property var maxNumber
 
-    property bool   addNewTr  : true
+    property bool   addNewTrip  : true
+    property var    tripId
     property var    tripDate
     property string description
     property real   km
-    property string projId
+    property string proj
 
-    canAccept: txtKilometer.text !== "0"
+    property string debugLog: generic.debugLog
+
+    // Available Projects
+    // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+
+    ListModel {
+        id: listModel
+
+        function update()
+        {
+            listModel.clear();
+            var projects = Database.getProjects();
+            for (var i = 0; i < projects.length; ++i) {
+                listModel.append(projects[i]);
+                console.log( JSON.stringify(projects[i]));
+            }
+            console.log( "listModel projects updated");
+//            console.log(JSON.stringify(listModel.get(0)));
+        }
+    }
+
+    onOpened: listModel.update();
+
+    canAccept: txtKilo.text.length > 0
 
     onAccepted: {
-        rawText = txtRaw.text === "" ? txtFormula.text : txtRaw.text
-        // addTrip(trid, tripDate, descriptn, kilometer, prid)
-        Database.addTrip(generic.tripId, tripDate, txtDescr.text, kilo, projid)
+        console.log("Accepted Dialog")
+        km          = txtKilo.text
+        tripDate    = txtDate.text
+        description = txtDesc.text
+//        proj        = boxProj.currentItem || ""
+        console.log(proj);
+//        console.log(boxProj.currentItem.project);
+//        console.log(JSON.stringify(boxProj.currentItem));
+        console.log("New trip: " + "|" + tripDate + "|" + description + "|" + km + "|" + proj)
+        // addTrip(addNewTrip, tripId, tripDate, descriptn, kilometer, project)
+        Database.addTrip(addNewTrip, tripId, tripDate, description, km, proj)
         dialog.callback(true, false)
     }
 
@@ -32,29 +63,39 @@ Dialog {
         dialog.callback(false, false)
     }
 
-    function getThisTrip(tripId) {
-        if (tripid === undefined) {
-            addNewTrip  = true
-            tripDate    = Qt.formatDate(new Date())
-            description = ""
-            km          = 0
-            projId      = ""
+    function prepareTrip(trId) {
+        console.log("Prepare for editing: " + JSON.stringify(recId))
+        if (recId === undefined) {
+            console.log("New trip, providing defaults")
+            var tmp = new Date()
+            addNewTrip   = true
+            tripId       = Qt.formatDateTime(tmp, "yyyy-MM-dd hh:mm:ss")
+            txtDate.text = Qt.formatDateTime(tmp, "yyyy-MM-dd")
+            txtDesc.text = ""
+            txtKilo.text = ""
         }
         else {
-            var trip = Database.getOneTrip(tripid)
-            console.log("This trip: " + JSON.stringify(trip))
-            tripDate    = trip.tripDate
-            description = trip.descriptn
-            km          = trip.kilometer
-            projId      = trip.projId
-
+            var trip = Database.getOneTrip(recId)
+            console.log("Getting this trip for editing: " + JSON.stringify(trip))
+            addNewTrip   = false
+            tripId       = trip.tripId
+            txtDate.text = trip.tripDate
+            txtDesc.text = trip.descriptn
+            txtKilo.text = trip.kilometer
+//          Nog niet correct
+            boxProj.value = trip.project
         }
     }
 
-    Component.onCompleted: getThisTrip(tripId);
+    Component.onCompleted: prepareTrip(recId);
 
     SilicaFlickable {
         id: tripView
+
+        PageHeader {
+            id: pageHeader
+            title: (addNewTrip ? "Add trip" : "Edit trip")
+        }
 
         VerticalScrollDecorator {}
 
@@ -64,7 +105,6 @@ Dialog {
             rightMargin: Theme.paddingMedium
         }
         contentHeight: column.height // + Theme.itemSizeMedium
-//        quickScroll : true
 
         Column {
             id: column
@@ -74,16 +114,72 @@ Dialog {
                 margins: 0
             }
 
-//            spacing: Theme.paddingSmall
+            spacing: Theme.paddingSmall
 
-            PageHeader {
-                id: pageHeader
-                title: (addNewtrip ? "Add trip" : "Edit trip")
+            Row {
+                IconButton {
+                    id: modifyDateButton
+
+                    width: Theme.iconSizeMedium
+                    height: width
+//                    anchors: { right: parent.right }
+
+//                    readonly property bool showPress: (pressed && containsMouse) || modifyDateButtonPressTimer.running
+
+                    icon.source: "../images/calendar-icon.svg"
+//                        highlightColor: parent.showPress ? Theme.highlightColor : Theme.primaryColor
+
+//                    onPressedChanged: {
+//                        if (pressed) {
+//                            modifyDateButtonPressTimer.start()
+//                        }
+//                    }
+
+//                    onCanceled: modifyDateButtonPressTimer.stop()
+
+                    onClicked: {
+                        console.log("modifyDateButton clicked")
+
+                        var dialogDate = pageStack.push(pickerDate, { date: new Date(txtDate.text) })
+                        dialogDate.accepted.connect(function() {
+                            console.log("You chose:", dialogDate.dateText)
+                            // use date, as dateText return varies
+                            txtDate.text = Qt.formatDateTime(new Date(dialogDate.date), "yyyy-MM-dd")
+                        })
+                    }
+
+//                    Timer {
+//                        id: modifyDateButtonPressTimer
+//                        interval: 50
+//                    }
+
+                    Component {
+                        id: pickerDate
+                        DatePickerDialog {}
+                    }
+                }
+
+                TextField {
+                    id: txtDate
+                    focus: true
+                    width: parent.width - modifyDateButton.width
+                    anchors {
+                        margins: Theme.paddingMedium
+                        left: modifyDateButton.right
+                    }
+                    label: qsTr("Date")
+                    placeholderText: label
+                    placeholderColor: Theme.secondaryColor
+                    color: Theme.primaryColor
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                    EnterKey.onClicked: txtKilo.focus = true
+                }
+
             }
 
             TextField {
-                id: txtKilometer
-                focus: true
+                id: txtKilo
                 width: parent.width
                 label: qsTr("Kilometer")
                 placeholderText: label
@@ -92,40 +188,46 @@ Dialog {
                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.enabled: text.length > 0
-                EnterKey.onClicked: txtTripDate.focus = true
+                EnterKey.onClicked: txtDesc.focus = true
             }
-
-            ValueButton {
-                id: txtTripDate
-
-                function openDateDialog() {
-                    var obj = pageStack.animatorPush("Sailfish.Silica.DatePickerDialog",
-                                                     { date: tripDate })
-
-                    obj.pageCompleted.connect(function(page) {
-                        page.accepted.connect(function() {
-                            value = page.dateText
-                            tripDate = page.date
-                        })
-                    })
+            ComboBox {
+                id: boxProj
+                label: qsTr("Project")
+//                currentIndex: 1
+                menu: ContextMenu {
+                    Repeater {
+                        model: listModel
+                        MenuItem {
+                            text: project;
+                            onClicked: {
+                                console.log("ComboBox onClicked: " + project)
+                                proj = project
+                            }
+                        }
+                    }
                 }
-
-                label: qsTr("Date")
-                value: tripDate
-                width: parent.width
-                onClicked: openDateDialog()
             }
 
-            TextArea {
-                id: txtDescr
+            TextField {
+                id: txtDesc
                 width: parent.width
                 label: qsTr("Description")
-                placeholderText: label
+                placeholderText: label + " - " + qsTr("not mandatory")
                 placeholderColor: Theme.secondaryColor
                 color: Theme.primaryColor
-//                EnterKey.enabled: text.length > 0
+//                EnterKey.iconSource: "image://theme/icon-m-enter-next"
+//                EnterKey.onClicked: txtProj.focus = true
+//            }
+//            TextField {
+//                id: txtProj
+//                width: parent.width
+//                label: qsTr("Project")
+//                placeholderText: label + " - " + qsTr("not mandatory")
+//                placeholderColor: Theme.secondaryColor
+//                color: Theme.primaryColor
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                EnterKey.onClicked: dialog.accept()
             }
-
         }
     }
 }
