@@ -56,11 +56,11 @@ Dialog {
         console.log("New trip: " + "|" + tripDate + "|" + description + "|" + km + "|" + proj)
         // addTrip(addNewTrip, tripId, tripDate, descriptn, kilometer, project)
         Database.addTrip(addNewTrip, tripId, tripDate, description, km, proj)
-        dialog.callback(true, false)
+        dialog.callback(true)
     }
 
     onRejected: {
-        dialog.callback(false, false)
+        dialog.callback(false)
     }
 
     function prepareTrip(trId) {
@@ -94,48 +94,52 @@ Dialog {
 
     Component.onCompleted: prepareTrip(recId);
 
+    IconButton {
+        id: modifyDateButton
+
+        width: Theme.iconSizeMedium
+        height: width
+
+        anchors {
+            top: pageHeader.bottom
+            right: parent.right
+            margins: Theme.paddingMedium
+        }
+
+        icon.source: "image://theme/icon-m-date"
+
+        onClicked: {
+            console.log("modifyDateButton clicked")
+            var dialogDate = pageStack.push(pickerDate, { date: new Date(txtDate.text) })
+            dialogDate.accepted.connect(function() {
+                console.log("You chose:", dialogDate.dateText)
+                // use date, as dateText return varies
+                txtDate.text = Qt.formatDateTime(new Date(dialogDate.date), "yyyy-MM-dd")
+            })
+        }
+
+        Component {
+            id: pickerDate
+            DatePickerDialog {}
+        }
+    }
+
     Column {
         id: column
         width: parent.width
         anchors {
             top: pageHeader.bottom
-            margins: 0
+            margins: Theme.paddingMedium
         }
 
         spacing: Theme.paddingSmall
 
-        IconButton {
-            id: modifyDateButton
-
-            width: Theme.iconSizeMedium
-            height: width
-
-            icon.source: "../images/calendar-icon.svg"
-
-            onClicked: {
-                console.log("modifyDateButton clicked")
-
-                var dialogDate = pageStack.push(pickerDate, { date: new Date(txtDate.text) })
-                dialogDate.accepted.connect(function() {
-                    console.log("You chose:", dialogDate.dateText)
-                    // use date, as dateText return varies
-                    txtDate.text = Qt.formatDateTime(new Date(dialogDate.date), "yyyy-MM-dd")
-                })
-            }
-
-            Component {
-                id: pickerDate
-                DatePickerDialog {}
-            }
-        }
-
         TextField {
             id: txtDate
             focus: true
-            width: parent.width - modifyDateButton.width
+            width: parent.width - modifyDateButton.width - Theme.paddingMedium * 2
             anchors {
-                margins: Theme.paddingMedium
-                left: modifyDateButton.right
+                left: parent.left // modifyDateButton.right
             }
             label: qsTr("Date")
             placeholderText: label
@@ -184,16 +188,6 @@ Dialog {
             placeholderText: label + " - " + qsTr("not mandatory")
             placeholderColor: Theme.secondaryColor
             color: Theme.primaryColor
-//                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-//                EnterKey.onClicked: txtProj.focus = true
-//            }
-//            TextField {
-//                id: txtProj
-//                width: parent.width
-//                label: qsTr("Project")
-//                placeholderText: label + " - " + qsTr("not mandatory")
-//                placeholderColor: Theme.secondaryColor
-//                color: Theme.primaryColor
             EnterKey.iconSource: "image://theme/icon-m-enter-close"
             EnterKey.onClicked: dialog.accept()
         }
