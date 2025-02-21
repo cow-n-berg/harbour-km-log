@@ -87,15 +87,21 @@ Page {
 //            contentHeight: Theme.itemSizeSmall
             ListView.onRemove: animateRemoval(listItem)
 
-            function edit() {
-                console.log("Editing trip: " + tripId)
-                pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+            onClicked: {
+                console.log("Showing trip: " + tripId)
+                pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
                       {"recId": tripId, callback: updateAfterDialog})
             }
-            function remove() {
-                console.log("Deleting trip: " + tripId)
-//                remorseAction("Deleting", function() { view.model.remove(index) })
-            }
+
+//            function edit() {
+//                console.log("Editing trip: " + tripId)
+//                pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+//                      {"recId": tripId, callback: updateAfterDialog})
+//            }
+//            function remove() {
+//                console.log("Deleting trip: " + tripId)
+////                remorseAction("Deleting", function() { view.model.remove(index) })
+//            }
 
             Rectangle {
                 id: rect

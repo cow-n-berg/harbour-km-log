@@ -21,7 +21,8 @@ Dialog {
     property string projType
     property string bgColor
 
-    property string debugLog: generic.debugLog
+    property var    boxList : ["bike", "car", "run", "walk" ]
+    property int    boxIndex
 
     canAccept: txtProj.text.length > 0 && (checkInvc.checked || checkTarg.checked)
 
@@ -32,21 +33,26 @@ Dialog {
         isTarget    = checkTarg.checked
         price       = checkInvc.checked ? txtPric.text : 0
         kmTarget    = checkTarg.checked ? txtTarg.text : 0
-        projType    = typeBox.value
+//        projType    = typeBox.value
         bgColor     = colorIndicator.color
-        console.log("New proj: " + project )
+        console.log("New project: " + project )
         // addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
         Database.addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
-        dialog.callback(true, false)
+        dialog.callback(true)
     }
 
     onRejected: {
-        dialog.callback(false, false)
+        dialog.callback(false)
     }
 
     function getThisProj(recId) {
         // Available in a Project
         // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+
+        // Setting up the ListModel
+        for (var i = 0; i < boxList.length; ++i) {
+            typeModel.append( { listText: boxList[i] });
+        }
 
         if (recId === undefined) {
             console.log("New project, providing defaults")
@@ -57,7 +63,7 @@ Dialog {
             checkTarg.checked = false
             txtPric.text      = ""
             txtTarg.text      = ""
-            typeBox.value     = "bike"
+            projType          = "car"
             colorIndicator.color = "#777777"
         }
         else {
@@ -69,18 +75,33 @@ Dialog {
             checkTarg.checked = proj.isTarget
             txtPric.text      = proj.price
             txtTarg.text      = proj.kmTarget
-            typeBox.value     = proj.projType
+            projType          = proj.projType
             colorIndicator.color = proj.bgColor
-
         }
+
+        // set the ComboBox right
+        for (i = 0; i < boxList.length; i++) {
+            if (boxList[i] === projType) {
+                boxIndex = i;
+            }
+        }
+        typeBox.currentIndex = boxIndex;
     }
 
     DialogHeader {
         id: pageHeader
-        title: (addNewProj ? "Add proj" : "Edit proj")
+        title: (addNewProj ? "Add project" : "Edit project")
     }
 
     Component.onCompleted: getThisProj(recId);
+
+    ListModel {
+        id: typeModel
+//        ListElement { listText: "bike" }
+//        ListElement { listText: "car" }
+//        ListElement { listText: "run" }
+//        ListElement { listText: "walk" }
+    }
 
     Column {
         id: column
@@ -113,7 +134,7 @@ Dialog {
 
                     width: height
                     height: parent.height
-                    color: "#777777"
+//                    color: "#777777"
                 }
                 Label {
                     text: "Color"
@@ -140,10 +161,16 @@ Dialog {
             id: typeBox
             label: "Type of project"
             menu: ContextMenu {
-                MenuItem { text: "bike" }
-                MenuItem { text: "car" }
-                MenuItem { text: "run" }
-                MenuItem { text: "walk" }
+                Repeater {
+                    model: typeModel
+                    MenuItem {
+                        text: listText;
+                        onClicked: {
+                            console.log("ComboBox onClicked: " + listText)
+                            projType = listText
+                        }
+                    }
+                }
             }
         }
 

@@ -138,25 +138,11 @@ function initializeDatabase( dbH ) {
 
     });
 
-//    // Temporary
-//    db.transaction(function(tx) {
-//        var rs = tx.executeSql('\
-//                INSERT OR REPLACE INTO km_trip \
-//                (tripId, tripDate, descriptn, kilometer, project) \
-//                VALUES (?,?,?,?,?);', ['2024-12-29', '2024-12-28', 'Snel > huis', 10, 'Cube 300 km']);
-//        var id = rs.insertId;
-//        console.log("Trip inserted, id=" + id);
-//        rs = tx.executeSql('\
-//                INSERT OR REPLACE INTO km_proj \
-//                (project, invoiced, price, kmTarget, isTarget, projType, bgColor) \
-//                VALUES (?,?,?,?,?,?,?);', ['Cube 300 km', 0, 0, 300, 1, 'bike', '#666666']);
-//        id = rs.insertId;
-//        console.log("Project inserted, id=" + id);
-//    } );
-
     /*
      * Set up view.
      */
+
+    // DROP VIEW IF EXISTS
     console.log("Set up views");
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
@@ -168,7 +154,7 @@ function initializeDatabase( dbH ) {
                    t.project, \
                    ifnull(p.price, 0) AS price, \
                    ifnull(p.isTarget, 0) AS isTarget, \
-                   ifnull(p.bgColor, '') AS bgColor \
+                   ifnull(p.bgColor, '#777777') AS bgColor \
               FROM km_trip t \
               LEFT OUTER JOIN km_proj p ON p.project = t.project \
              ORDER BY t.tripDate DESC, t.tripId \
@@ -228,7 +214,7 @@ function getTrips() {
                    t.project, \
                    ifnull(p.price, 0) AS price, \
                    ifnull(p.isTarget, 0) AS isTarget, \
-                   ifnull(p.bgColor, '') AS bgColor \
+                   ifnull(p.bgColor, '#777777') AS bgColor \
               FROM km_trip t \
               LEFT OUTER JOIN km_proj p ON p.project = t.project \
              ORDER BY t.tripDate DESC, t.tripId \
@@ -341,7 +327,7 @@ function showInvoices() {
     return totals;
 }
 
-function showAllData(debugLog) {
+function showAllData() {
     var rs
     console.log("showAllData ");
     var db = databaseHandler || openDatabase();
@@ -376,20 +362,25 @@ function getOneTrip(tripId) {
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT tripId, \
-                   tripDate, \
-                   descriptn, \
-                   kilometer, \
-                   project \
-              FROM km_trip t  \
-                WHERE tripId = ? \
+            SELECT t.tripId, \
+                   t.tripDate, \
+                   t.descriptn, \
+                   t.kilometer, \
+                   t.project, \
+                   ifnull(p.price, 0) AS price, \
+                   ifnull(p.isTarget, 0) AS isTarget, \
+                   ifnull(p.bgColor, '#777777') AS bgColor \
+              FROM km_trip t \
+              LEFT OUTER JOIN km_proj p ON p.project = t.project \
+                WHERE t.tripId = ? \
             ;", [tripId]);
 
         trip  = { tripId    : rs.rows.item(0).tripId,
                   tripDate  : rs.rows.item(0).tripDate,
                   descriptn : rs.rows.item(0).descriptn,
                   kilometer : rs.rows.item(0).kilometer,
-                  project   : rs.rows.item(0).project
+                  project   : rs.rows.item(0).project,
+                  bgColor   : rs.rows.item(0).bgColor
                 };
         console.log(JSON.stringify(trip));
     });
@@ -468,7 +459,7 @@ function deleteTrip(tripId)
     db.transaction(function(tx) {
         tx.executeSql("\
             DELETE FROM km_trip \
-                WHERE tripId='?' \
+                WHERE tripId=? \
             ;", [tripId]);
     });
 
@@ -481,7 +472,7 @@ function deleteProj(project)
     db.transaction(function(tx) {
         tx.executeSql("\
             DELETE FROM km_proj \
-                WHERE project='?' \
+                WHERE project=? \
             ;", [project]);
     });
 

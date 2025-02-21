@@ -12,11 +12,11 @@ ApplicationWindow
     property string version    : "0.2"
     property string dbversion  : "0.1"
     property var    dbhandler  : DB.openDatabase(dbversion)
-    property bool   debug      : true
-    property string debugLog   : ""
+    property bool   debug      : false
 
     // Tzt verwijderen ook uit Database.js
     property bool tempDelDB    : false
+
 
     // Settings
     property bool coverShowAppName        : DB.getSetting( "coverShowAppName" , false )

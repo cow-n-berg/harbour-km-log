@@ -12,8 +12,6 @@ Page {
 
     allowedOrientations: Orientation.Portrait
 
-    property string debugLog: generic.debugLog
-
     function updateAfterDialog(updated) {
         if (updated) {
             listModel.update()
@@ -75,16 +73,12 @@ Page {
             menu: contextMenu
             width: parent.width
 //            contentHeight: Theme.itemSizeSmall
-            ListView.onRemove: animateRemoval(listItem)
+//            ListView.onRemove: animateRemoval(listItem)
 
-            function edit() {
-                console.log("Editing project: " + project)
-                pageStack.push(Qt.resolvedUrl("ProjAddPage.qml"),
-                      {"recId": project, callback: updateAfterDialog})
-            }
-            function remove() {
-                console.log("Deleting project: " + project)
-//                remorseAction("Deleting", function() { view.model.remove(index) })
+            onClicked: {
+                console.log("Clicked proj " + index)
+                pageStack.push(Qt.resolvedUrl("ProjShowPage.qml"),
+                               {"recId": project, callback: updateAfterDialog})
             }
 
             Rectangle {
@@ -138,12 +132,19 @@ Page {
                 id: contextMenu
                 ContextMenu {
                     MenuItem {
-                        text: "Edit"
-                        onClicked: edit()
+                        text: "Edit project"
+                        onClicked: {
+                            pageStack.push(Qt.resolvedUrl("ProjAddPage.qml"),
+                                           {"recId": project, callback: updateAfterDialog})
+                        }
                     }
                     MenuItem {
-                        text: "Remove"
-                        onClicked: remove()
+                        text: qsTr("Delete this project")
+                        onClicked: remorse.execute("Deleting project", function() {
+                            console.log("Remove project " + project)
+                            Database.deleteProj(project)
+                            updateAfterDialog(true)
+                        })
                     }
                 }
             }
