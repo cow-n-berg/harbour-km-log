@@ -40,6 +40,20 @@ Page {
 
     Component.onCompleted: listModel.update();
 
+    //        IconButton {
+    //            id: iconContainer
+    //            anchors {
+    //                right: listView.right - Theme.paddingMedium
+    //                verticalCenter: pageHeader.verticalCenter
+    //            }
+
+    //            icon.source: "image://theme/icon-m-add"
+    //            icon.color: Theme.primaryColor
+    //            onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+    //                                      {recId: undefined, callback: updateAfterDialog})
+    //        }
+
+
     SilicaListView {
         id: listView
         model: listModel
@@ -60,19 +74,6 @@ Page {
 
         VerticalScrollDecorator {}
 
-//        IconButton {
-//            id: iconContainer
-//            anchors {
-//                right: listView.right - Theme.paddingMedium
-//                verticalCenter: pageHeader.verticalCenter
-//            }
-
-//            icon.source: "image://theme/icon-m-add"
-//            icon.color: Theme.primaryColor
-//            onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-//                                      {recId: undefined, callback: updateAfterDialog})
-//        }
-
         ViewPlaceholder {
             id: placeh
             enabled: listModel.count === 0
@@ -82,26 +83,15 @@ Page {
 
         delegate: ListItem {
             id: listItem
-            menu: contextMenu
+//            menu: contextMenu
             width: parent.width
-//            contentHeight: Theme.itemSizeSmall
-            ListView.onRemove: animateRemoval(listItem)
+//            ListView.onRemove: animateRemoval(listItem)
 
             onClicked: {
                 console.log("Showing trip: " + tripId)
                 pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
                       {"recId": tripId, callback: updateAfterDialog})
             }
-
-//            function edit() {
-//                console.log("Editing trip: " + tripId)
-//                pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-//                      {"recId": tripId, callback: updateAfterDialog})
-//            }
-//            function remove() {
-//                console.log("Deleting trip: " + tripId)
-////                remorseAction("Deleting", function() { view.model.remove(index) })
-//            }
 
             Rectangle {
                 id: rect
@@ -111,13 +101,9 @@ Page {
                     margins: Theme.paddingMedium
                     left: parent.left
                     verticalCenter: parent.verticalCenter
-//                    rightMargin: Theme.paddingMedium
                 }
                 color: bgColor ? bgColor : "#555555"
                 opacity: 1
-//                Label {
-//                    text: ""
-//                }
             }
 
             Label {
@@ -154,7 +140,6 @@ Page {
                 width: parent.width * 0.4
                 anchors {
                     top: parent.top
-//                    left: date.right
                     right: parent.right
                     margins: Theme.paddingSmall
                 }
@@ -163,7 +148,6 @@ Page {
             Label {
                 id: desc
                 text: descriptn
-//                text: TF.truncateString(descriptn, 30)
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryColor
                 width: parent.width * 0.8
@@ -178,22 +162,6 @@ Page {
             Separator {
                 width: parent.width
                 color: Theme.secondaryColor
-            }
-
-            RemorsePopup { id: remorse }
-
-            Component {
-                id: contextMenu
-                ContextMenu {
-                    MenuItem {
-                        text: "Edit"
-                        onClicked: edit()
-                    }
-                    MenuItem {
-                        text: "Remove"
-                        onClicked: remove()
-                    }
-                }
             }
         }
 
@@ -213,6 +181,10 @@ Page {
 //                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
 //                                          {callback: updateAfterDialog})
 //            }
+            MenuItem {
+                text: qsTr("View invoices")
+                onClicked: pageStack.push(Qt.resolvedUrl("ReportPage.qml"))
+            }
             MenuItem {
                 text: qsTr("View projects")
                 onClicked: pageStack.push(Qt.resolvedUrl("ProjectsPage.qml"))

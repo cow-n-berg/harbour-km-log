@@ -73,8 +73,8 @@ Dialog {
             txtProj.text      = proj.project
             checkInvc.checked = proj.invoiced
             checkTarg.checked = proj.isTarget
-            txtPric.text      = proj.price
-            txtTarg.text      = proj.kmTarget
+            txtPric.text      = proj.price || ""
+            txtTarg.text      = proj.kmTarget || ""
             projType          = proj.projType
             colorIndicator.color = proj.bgColor
         }
@@ -97,10 +97,6 @@ Dialog {
 
     ListModel {
         id: typeModel
-//        ListElement { listText: "bike" }
-//        ListElement { listText: "car" }
-//        ListElement { listText: "run" }
-//        ListElement { listText: "walk" }
     }
 
     Column {

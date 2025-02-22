@@ -316,12 +316,39 @@ function showInvoices() {
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT * \
-              FROM showInvoices \
+            SELECT * FROM ( \
+                SELECT 0 AS detail, \
+                       'TOTAL KM' AS project, \
+                       SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
+                       CASE WHEN SUM(IFNULL(t.kilometer, 0)) = 0 \
+                            THEN 0 \
+                            ELSE SUM(IFNULL(t.kilometer * p.price, 0)) / SUM(IFNULL(t.kilometer, 0)) \
+                            END AS price, \
+                       SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
+                       ROUND(SUM(IFNULL(t.kilometer * p.price, 0)), 2) AS amount \
+                  FROM km_trip t \
+                  LEFT OUTER JOIN km_proj p ON p.project = t.project \
+                 WHERE p.invoiced \
+                 GROUP BY tripMonth \
+            UNION \
+                SELECT 1 AS detail, \
+                       t.project, \
+                       SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
+                       p.price, \
+                       SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
+                       ROUND(SUM(IFNULL(t.kilometer * p.price, 0)), 2) AS amount \
+                  FROM km_trip t \
+                  LEFT OUTER JOIN km_proj p ON p.project = t.project \
+                 WHERE p.invoiced \
+                 GROUP BY tripMonth, t.project \
+            ) \
+            ORDER BY tripMonth DESC, detail, project \
             ;");
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));
         }
+        console.log("showInvoices, number of rows: ");
+        console.log(rs.rows.length);
     });
 
     return totals;

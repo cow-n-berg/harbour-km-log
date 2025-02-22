@@ -19,8 +19,8 @@ Page {
         }
     }
 
-    // Available Trips
-    // tripId, tripDate, descriptn, kilometer, project, projType, price, isTarget, bgColor
+    // Available Totals
+    // project, detail, tripMonth, price, kilometer, amount
 
     ListModel {
         id: listModel
@@ -28,63 +28,115 @@ Page {
         function update()
         {
             listModel.clear();
-            var trips = Database.getTrips();
-            for (var i = 0; i < trips.length; ++i) {
-                listModel.append(trips[i]);
-                console.log( JSON.stringify(trips[i]));
+            var totals = Database.showInvoices();
+            for (var i = 0; i < totals.length; ++i) {
+                listModel.append(totals[i]);
+                console.log( JSON.stringify(totals[i]));
             }
-            console.log( "listModel trips updated");
-//            console.log(JSON.stringify(listModel.get(0)));
+            console.log( "listModel totals updated");
         }
     }
 
     Component.onCompleted: listModel.update();
-    SilicaFlickable {
+
+    SilicaListView {
+        id: listView
+        model: listModel
+
+        anchors {
+            fill: parent
+            leftMargin: Theme.paddingMedium
+            rightMargin: Theme.paddingMedium
+        }
+        spacing: Theme.paddingMedium
+
         PageHeader {
             id: pageHeader
-            title: qsTr("Reports") //+ "     "
+            title: qsTr("Invoice reports") //+ "     "
         }
 
-        Column {
+        ViewPlaceholder {
+            id: placeh
+            enabled: listModel.count === 0
+            text: "No invoices yet"
+            hintText: "Add some trips,\nand/or create some projects"
+        }
 
-            anchors {
-                fill: parent
-                leftMargin: Theme.paddingMedium
-                rightMargin: Theme.paddingMedium
+        delegate: ListItem {
+            id: listItem
+//            menu: contextMenu
+            width: parent.width
+//            ListView.onRemove: animateRemoval(listItem)
+
+            Label {
+                id: date
+                text: tripMonth
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.primaryColor
+                width: parent.width * 0.2
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    // margins: Theme.paddingSmall
+                }
             }
 
             Label {
-                height: parent.height
-                text: "Klaar voor actie"
-                font.pixelSize: Theme.fontSizeExtraSmall
+                id: proj
+                text: TF.truncateString(project, 10)
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.primaryColor
+                width: parent.width * 0.3
+                anchors {
+                    top: parent.top
+                    left: date.right
+                    // margins: Theme.paddingSmall
+                }
             }
 
-        }
+            Label {
+                id: km
+                text: kilometer
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.primaryColor
+                width: parent.width * 0.18
+                anchors {
+                    top: parent.top
+                    left: proj.right
+                    // margins: Theme.paddingSmall
+                }
+            }
 
-        PullDownMenu {
-            MenuItem {
-                text: qsTr("Show Contents DB in Console")
-                enabled: generic.debug
-                visible: generic.debug
-                onClicked: Database.showAllData()
+            Label {
+                id: pric
+                text: price
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.secondaryColor
+                width: parent.width * 0.14
+                anchors {
+                    top: parent.top
+                    left: km.right
+                    // margins: Theme.paddingSmall
+                }
             }
-    //            MenuItem {
-    //                text: qsTr("About")
-    //                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
-    //            }
-    //            MenuItem {
-    //                text: qsTr("Settings")
-    //                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
-    //                                          {callback: updateAfterDialog})
-    //            }
-            MenuItem {
-                text: qsTr("View projects")
-                onClicked: pageStack.push(Qt.resolvedUrl("ProjectsPage.qml"))
+
+            Label {
+                id: amnt
+                text: amount
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.primaryColor
+                width: parent.width * 0.18
+                anchors {
+                    top: parent.top
+                    left: pric.right
+//                    right: parent.right
+                    // margins: Theme.paddingSmall
+                }
             }
-            MenuItem {
-                text: qsTr("View trips")
-                onClicked: pageStack.push(Qt.resolvedUrl("TripsPage.qml"))
+
+            Separator {
+                width: parent.width
+                color: Theme.secondaryColor
             }
         }
     }

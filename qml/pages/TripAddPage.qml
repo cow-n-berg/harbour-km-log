@@ -12,35 +12,18 @@ Dialog {
     property var callback
     property var template
 
-    property bool   addNewTrip  : true
+    property bool   addNewTrip : true
     property var    tripId
     property var    tripDate
     property string description
     property real   km
     property string proj
 
-    property string debugLog: generic.debugLog
+    property var    boxList    : []
+    property int    boxIndex
+    property bool   boxIsSet   : false
 
-    // Available Projects
-    // project, invoiced, price, kmTarget, isTarget, projType, bgColor
-
-    ListModel {
-        id: listModel
-
-        function update()
-        {
-            listModel.clear();
-            var projects = Database.getProjects();
-            for (var i = 0; i < projects.length; ++i) {
-                listModel.append(projects[i]);
-                console.log( JSON.stringify(projects[i]));
-            }
-            console.log( "listModel projects updated");
-//            console.log(JSON.stringify(listModel.get(0)));
-        }
-    }
-
-    onOpened: listModel.update();
+//    onOpened: prepareProj();
 
     canAccept: txtKilo.text.length > 0
 
@@ -49,10 +32,7 @@ Dialog {
         km          = txtKilo.text
         tripDate    = txtDate.text
         description = txtDesc.text
-//        proj        = boxProj.currentItem || ""
-        console.log(proj);
-//        console.log(boxProj.currentItem.project);
-//        console.log(JSON.stringify(boxProj.currentItem));
+//        proj        = boxProj.currentItem
         console.log("New trip: " + "|" + tripDate + "|" + description + "|" + km + "|" + proj)
         // addTrip(addNewTrip, tripId, tripDate, descriptn, kilometer, project)
         Database.addTrip(addNewTrip, tripId, tripDate, description, km, proj)
@@ -63,7 +43,31 @@ Dialog {
         dialog.callback(false)
     }
 
+    // Available Projects
+    // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+
+    function prepareProj() {
+//        listModel.clear();
+        var projects = Database.getProjects();
+        for (var i = 0; i < projects.length; ++i) {
+            boxList.push(projects[i].project)
+        }
+        console.log( JSON.stringify(boxList));
+        console.log( JSON.stringify(boxList.length));
+
+        // Setting up the ListModel
+        for (i = 0; i < boxList.length; ++i) {
+            listModel.append( { listText: boxList[i] });
+        }
+        console.log( "listModel projects updated");
+
+        boxIsSet = true
+    }
+
     function prepareTrip(trId) {
+
+        if (!boxIsSet) prepareProj();
+
         console.log("Prepare for editing: " + JSON.stringify(recId))
         if (recId === undefined) {
             console.log("New trip, providing defaults")
@@ -82,9 +86,16 @@ Dialog {
             txtDate.text = trip.tripDate
             txtDesc.text = trip.descriptn
             txtKilo.text = trip.kilometer
-//          Nog niet correct
-            boxProj.value = trip.project
         }
+
+        // set the ComboBox right
+        boxIndex = 1;
+        for (i = 0; i < boxList.length; i++) {
+            if (boxList[i] === projType) {
+                boxIndex = i;
+            }
+        }
+        typeBox.currentIndex = boxIndex;
     }
 
     DialogHeader {
@@ -93,6 +104,10 @@ Dialog {
     }
 
     Component.onCompleted: prepareTrip(recId);
+
+    ListModel {
+        id: listModel
+    }
 
     IconButton {
         id: modifyDateButton
@@ -171,10 +186,10 @@ Dialog {
                 Repeater {
                     model: listModel
                     MenuItem {
-                        text: project;
+                        text: listText;
                         onClicked: {
-                            console.log("ComboBox onClicked: " + project)
-                            proj = project
+                            console.log("ComboBox onClicked: " + listText)
+                            proj = listText
                         }
                     }
                 }

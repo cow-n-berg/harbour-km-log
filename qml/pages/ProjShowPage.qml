@@ -34,6 +34,7 @@ Dialog {
     function updateAfterDialog(updated) {
         if (updated) {
             somethingHasChanged = true
+            getThisProj(recId)
         }
     }
 
@@ -115,6 +116,7 @@ Dialog {
                 id: txtPric
                 width: parent.width
                 label: qsTr("Price per kilometer")
+                readOnly: true
                 color: Theme.primaryColor
                 visible: invoiced
             }

@@ -30,6 +30,7 @@ Dialog {
     function updateAfterDialog(updated) {
         if (updated) {
             somethingHasChanged = true
+            prepareTrip(trId)
         }
     }
 
