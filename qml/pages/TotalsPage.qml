@@ -14,24 +14,24 @@ Page {
     allowedOrientations: Orientation.Portrait
 
     ListModel {
-        id: listInvoice
+        id: listTotal
 
-        // Available Invoices
-        // project, detail, tripMonth, txtPrice, txtKm, txtAmount
+        // Available Totals
+        // project, detail, tripMonth, txtTarget, txtKm
 
         function update()
         {
-            listInvoice.clear();
-            var totals = Database.showInvoices();
+            listTotal.clear();
+            var totals = Database.showTotals();
             for (var i = 0; i < totals.length; ++i) {
-                listInvoice.append(totals[i]);
+                listTotal.append(totals[i]);
                 console.log( JSON.stringify(totals[i]));
             }
-            console.log( "listInvoice updated");
+            console.log( "listTotal updated");
         }
     }
 
-    Component.onCompleted: listInvoice.update()
+    Component.onCompleted: listTotal.update()
 
     SilicaFlickable {
         id: flick
@@ -48,30 +48,37 @@ Page {
 
             PageHeader {
                 id: pageHeader
-                title: qsTr("Invoices")
+                title: qsTr("Totals")
             }
 
             ViewPlaceholder {
-                id: placehInv
-                enabled: listInvoice.count === 0
-                text: "No invoices yet"
+                id: placehTot
+                enabled: listTotal.count === 0
+                text: "No targets yet"
                 hintText: "Add some trips,\nand/or create some projects"
             }
 
             DelegateColumn {
-                model: listInvoice
+                model: listTotal
                 delegate: TwoLineDelegate {
-                    text: project || qsTr("Monthly totals")
-                    description: qsTr("Total of ") + txtKm + qsTr(" km @ ") + txtPrice
-                    highlighted: detail === 0
-//                    showOddEven: true
+                    text: project
+                    description: qsTr("Target is ") + txtTarget + qsTr(" km")
 
-                    leftItem: DelegateInfoItem {
-                        text: tripMonth
-                    }
+                    showOddEven: true
+
+                    leftItem: Item {
+                         width: Theme.itemSizeSmall
+                         height: width
+
+                         Rectangle {
+                             anchors.fill: parent
+                             color: bgColor
+                         }
+
+                     }
                     rightItem: DelegateInfoItem {
-                        text: txtAmount
-                        description: qsTr("euro")
+                        text: txtKm
+                        description: qsTr("km")
                         alignment: Qt.AlignRight
                     }
                 }

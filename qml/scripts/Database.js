@@ -201,12 +201,11 @@ function initializeDatabase( dbH ) {
 /*
  * All records.
  */
-function getTrips() {
+function getTrips(filterProject) {
     var trips = [];
     console.log("getTrips ");
     var db = databaseHandler || openDatabase();
-    db.transaction(function(tx) {
-        var rs = tx.executeSql("\
+    var query = "\
             SELECT t.tripId, \
                    t.tripDate, \
                    t.descriptn, \
@@ -216,9 +215,16 @@ function getTrips() {
                    ifnull(p.isTarget, 0) AS isTarget, \
                    ifnull(p.bgColor, '#777777') AS bgColor \
               FROM km_trip t \
-              LEFT OUTER JOIN km_proj p ON p.project = t.project \
-             ORDER BY t.tripDate DESC, t.tripId \
-            ;");
+              LEFT OUTER JOIN km_proj p ON p.project = t.project ";
+
+    if (typeof filterProject == "string")
+        query += "WHERE t.project = '" + filterProject + "' ";
+
+    query += "ORDER BY t.tripDate DESC, t.tripId;";
+    console.log(query);
+
+    db.transaction(function(tx) {
+        var rs = tx.executeSql(query);
         for (var i = 0; i < rs.rows.length; ++i) {
             trips.push(rs.rows.item(i));
         }
@@ -295,12 +301,22 @@ function addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projT
 
 function showTotals() {
     var totals = [];
-    console.log("showTotals");
+    console.log("showTargets");
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT * \
-              FROM showTotals \
+            SELECT p.project, \
+                   p.kmTarget, \
+                   p.projType, \
+                   p.bgColor, \
+                   SUM(IFNULL(t.kilometer, 0)) AS kmTotal, \
+                   printf('%,.0f', p.kmTarget) AS txtKmTarget, \
+                   printf('%,.0f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+              FROM km_proj p \
+              LEFT OUTER JOIN km_trip t ON p.project = t.project \
+             WHERE p.isTarget = 1 \
+             GROUP BY p.project \
+             ORDER BY p.project \
             ;");
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));
@@ -316,9 +332,22 @@ function showInvoices() {
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT * FROM ( \
+            SELECT detail, \
+                   project, \
+                   tripMonth, \
+                   amount, \
+                   kilometer, \
+                   price, \
+                   printf('%,.0f', kilometer) AS txtKm, \
+                   printf('%,.2f', price) AS txtPrice, \
+                   printf('%,.f', amount) AS txtAmount, \
+                   CASE WHEN detail = 0 \
+                        THEN printf('A total of %,.0f km', kilometer) \
+                        ELSE printf('%,.0f km @ %,.2f', kilometer, price) \
+                        END AS descr \
+            FROM ( \
                 SELECT 0 AS detail, \
-                       'TOTAL KM' AS project, \
+                       '' AS project, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        CASE WHEN SUM(IFNULL(t.kilometer, 0)) = 0 \
                             THEN 0 \
@@ -330,7 +359,7 @@ function showInvoices() {
                   LEFT OUTER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
                  GROUP BY tripMonth \
-            UNION \
+              UNION \
                 SELECT 1 AS detail, \
                        t.project, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \

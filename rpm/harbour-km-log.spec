@@ -2,7 +2,7 @@ Name:       harbour-km-log
 
 Summary:    Kilometer
 Version:    0.2
-Release:    6
+Release:    8
 License:    LICENSE
 BuildArch:  noarch
 URL:        http://example.org/
@@ -41,3 +41,7 @@ desktop-file-install --delete-original         --dir %{buildroot}%{_datadir}/app
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+
+# >> macros
+%define __provides_exclude_from ^%{_datadir}/.*$
+# << macros

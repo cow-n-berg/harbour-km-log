@@ -166,12 +166,6 @@ Page {
         }
 
         PullDownMenu {
-            MenuItem {
-                text: qsTr("Show Contents DB in Console")
-                enabled: generic.debug
-                visible: generic.debug
-                onClicked: Database.showAllData()
-            }
 //            MenuItem {
 //                text: qsTr("About")
 //                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
@@ -182,11 +176,15 @@ Page {
 //                                          {callback: updateAfterDialog})
 //            }
             MenuItem {
-                text: qsTr("View invoices")
+                text: qsTr("Totals")
+                onClicked: pageStack.push(Qt.resolvedUrl("TotalsPage.qml"))
+            }
+            MenuItem {
+                text: qsTr("Invoices")
                 onClicked: pageStack.push(Qt.resolvedUrl("ReportPage.qml"))
             }
             MenuItem {
-                text: qsTr("View projects")
+                text: qsTr("Projects")
                 onClicked: pageStack.push(Qt.resolvedUrl("ProjectsPage.qml"))
             }
             MenuItem {
