@@ -44,7 +44,7 @@ Page {
         Column {
             id: column
             width: parent.width
-            spacing: Theme.paddingMedium
+            spacing: Theme.paddingSmall
 
             PageHeader {
                 id: pageHeader

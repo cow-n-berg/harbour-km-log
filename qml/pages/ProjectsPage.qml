@@ -83,8 +83,9 @@ Page {
 
             Rectangle {
                 id: rect
-                width: Theme.paddingMedium
-                height: parent.height - Theme.paddingSmall * 2
+                height: Theme.itemSizeMedium * 0.5
+                width: Theme.itemSizeMedium * 0.15
+                radius: width
                 anchors {
                     left: parent.left
                     verticalCenter: parent.verticalCenter

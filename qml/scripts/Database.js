@@ -257,7 +257,7 @@ function getProjects() {
     return projs;
 }
 
-function addTrip(addNewTrip, tripId, tripDate, descriptn, kilometer, project)
+function addTrip(tripId, tripDate, descriptn, kilometer, project)
 {
     console.log("addTrip ");
     var db = databaseHandler || openDatabase();

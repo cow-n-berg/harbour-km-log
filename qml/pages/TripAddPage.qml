@@ -9,10 +9,10 @@ Dialog {
     allowedOrientations: Orientation.All
 
     property var recId
+    property var copyFrom
     property var callback
-    property var template
+    property string headline
 
-    property bool   addNewTrip : true
     property var    tripId
     property var    tripDate
     property string description
@@ -21,9 +21,6 @@ Dialog {
 
     property var    boxList    : []
     property int    boxIndex
-    property bool   boxIsSet   : false
-
-//    onOpened: prepareProj();
 
     canAccept: txtKilo.text.length > 0
 
@@ -32,10 +29,9 @@ Dialog {
         km          = txtKilo.text
         tripDate    = txtDate.text
         description = txtDesc.text
-//        proj        = boxProj.currentItem
         console.log("New trip: " + "|" + tripDate + "|" + description + "|" + km + "|" + proj)
-        // addTrip(addNewTrip, tripId, tripDate, descriptn, kilometer, project)
-        Database.addTrip(addNewTrip, tripId, tripDate, description, km, proj)
+        // addTrip(tripId, tripDate, descriptn, kilometer, project)
+        Database.addTrip(tripId, tripDate, description, km, proj)
         dialog.callback(true)
     }
 
@@ -43,11 +39,19 @@ Dialog {
         dialog.callback(false)
     }
 
-    // Available Projects
-    // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+    ListModel {
+        id: listModel
+    }
 
-    function prepareProj() {
-//        listModel.clear();
+    function prepareTrip(trId) {
+        var tmp = new Date()
+
+        // First set up the listModel
+        listModel.clear();
+        boxList = [];
+
+        // Available Projects
+        // project, invoiced, price, kmTarget, isTarget, projType, bgColor
         var projects = Database.getProjects();
         for (var i = 0; i < projects.length; ++i) {
             boxList.push(projects[i].project)
@@ -61,53 +65,55 @@ Dialog {
         }
         console.log( "listModel projects updated");
 
-        boxIsSet = true
-    }
-
-    function prepareTrip(trId) {
-
-        if (!boxIsSet) prepareProj();
-
+        if (recId === undefined || copyFrom === undefined) copyFrom = false;
+        console.log(copyFrom)
+        console.log(recId)
         console.log("Prepare for editing: " + JSON.stringify(recId))
         if (recId === undefined) {
             console.log("New trip, providing defaults")
-            var tmp = new Date()
-            addNewTrip   = true
+            headline = qsTr("Add trip")
             tripId       = Qt.formatDateTime(tmp, "yyyy-MM-dd hh:mm:ss")
             txtDate.text = Qt.formatDateTime(tmp, "yyyy-MM-dd")
             txtDesc.text = ""
             txtKilo.text = ""
+            proj         = ""
         }
         else {
             var trip = Database.getOneTrip(recId)
             console.log("Getting this trip for editing: " + JSON.stringify(trip))
-            addNewTrip   = false
+            headline = qsTr("Edit trip")
             tripId       = trip.tripId
             txtDate.text = trip.tripDate
             txtDesc.text = trip.descriptn
             txtKilo.text = trip.kilometer
+            proj         = trip.project
+        }
+
+        if (copyFrom) {
+            console.log("Adding this trip as new instead")
+            headline = qsTr("Copy trip as new")
+            tripId       = Qt.formatDateTime(tmp, "yyyy-MM-dd hh:mm:ss")
+            txtDate.text = Qt.formatDateTime(tmp, "yyyy-MM-dd")
         }
 
         // set the ComboBox right
-        boxIndex = 1;
+        boxIndex = 0;
         for (i = 0; i < boxList.length; i++) {
-            if (boxList[i] === projType) {
+            if (boxList[i] === proj) {
                 boxIndex = i;
+                console.log("Found proper index for ComboBox")
+                console.log(boxIndex)
             }
         }
-        typeBox.currentIndex = boxIndex;
+        boxProj.currentIndex = boxIndex;
     }
 
     DialogHeader {
         id: pageHeader
-        title: (addNewTrip ? "Add trip" : "Edit trip")
+        title: headline
     }
 
     Component.onCompleted: prepareTrip(recId);
-
-    ListModel {
-        id: listModel
-    }
 
     IconButton {
         id: modifyDateButton

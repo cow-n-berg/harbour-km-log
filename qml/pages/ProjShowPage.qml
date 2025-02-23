@@ -69,13 +69,14 @@ Dialog {
 
         PageHeader {
             id: pageHeader
-            title: qsTr("One project") + "     "
+            title: qsTr("One project") + "       "
         }
 
         Rectangle {
             id: colorIndicator
-            width: Theme.iconSizeMedium
-            height: width
+            height: Theme.itemSizeMedium * 0.5
+            width: height
+            radius: Theme.itemSizeMedium * 0.15
             anchors {
                 verticalCenter: pageHeader.verticalCenter
                 right: parent.right

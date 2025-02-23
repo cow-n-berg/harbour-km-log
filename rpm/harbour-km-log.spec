@@ -1,8 +1,8 @@
 Name:       harbour-km-log
 
 Summary:    Kilometer
-Version:    0.2
-Release:    8
+Version:    0.3
+Release:    0
 License:    LICENSE
 BuildArch:  noarch
 URL:        http://example.org/

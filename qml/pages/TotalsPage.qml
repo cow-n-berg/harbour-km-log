@@ -17,7 +17,7 @@ Page {
         id: listTotal
 
         // Available Totals
-        // project, detail, tripMonth, txtTarget, txtKm
+        // project, detail, tripMonth, txtKmTarget, txtKm
 
         function update()
         {
@@ -62,9 +62,9 @@ Page {
                 model: listTotal
                 delegate: TwoLineDelegate {
                     text: project
-                    description: qsTr("Target is ") + txtTarget + qsTr(" km")
+                    description: qsTr("Target is ") + txtKmTarget + qsTr(" km")
 
-                    showOddEven: true
+//                    showOddEven: true
 
                     leftItem: Item {
                          width: Theme.itemSizeSmall

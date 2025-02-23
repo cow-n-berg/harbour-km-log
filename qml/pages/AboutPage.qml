@@ -4,8 +4,8 @@ import "../modules/Opal/About"
 AboutPageBase {
     appName: qsTr("Kilometer")
     appIcon: Qt.resolvedUrl("../images/harbour-km-log.svg")
-    appVersion: APP_VERSION
-    appRelease: APP_RELEASE
+    appVersion: generic.version
+//    appRelease: APP_RELEASE
     description: qsTr("Kilometer is a log for two purposes.\n\n" +
                       "Firstly, kilometers made per car, to be invoiced to a client " +
                       "and/or to be paid to me (you), to cover the costs.\n\n" +

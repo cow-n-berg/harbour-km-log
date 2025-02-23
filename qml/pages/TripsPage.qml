@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
 
@@ -15,7 +16,7 @@ Page {
     function updateAfterDialog(updated) {
         if (updated) {
             listModel.update()
-            listView.scrollToTop()
+            flick.scrollToTop()
         }
     }
 
@@ -38,143 +39,118 @@ Page {
         }
     }
 
-    Component.onCompleted: listModel.update();
+    Component.onCompleted: listModel.update()
 
-    //        IconButton {
-    //            id: iconContainer
-    //            anchors {
-    //                right: listView.right - Theme.paddingMedium
-    //                verticalCenter: pageHeader.verticalCenter
-    //            }
+    SilicaFlickable {
+        id: flick
+        anchors.fill: parent
 
-    //            icon.source: "image://theme/icon-m-add"
-    //            icon.color: Theme.primaryColor
-    //            onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-    //                                      {recId: undefined, callback: updateAfterDialog})
-    //        }
-
-
-    SilicaListView {
-        id: listView
-        model: listModel
-
-        anchors {
-            fill: parent
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
-        }
-        spacing: Theme.paddingMedium
-
-        header: PageHeader {
-            id: pageHeader
-            title: qsTr("Trips") //+ "     "
+        VerticalScrollDecorator {
+            flickable: flick
         }
 
         quickScroll : true
 
-        VerticalScrollDecorator {}
-
-        ViewPlaceholder {
-            id: placeh
-            enabled: listModel.count === 0
-            text: "No trips yet"
-            hintText: "Pull down to add,\nand/or create some projects"
-        }
-
-        delegate: ListItem {
-            id: listItem
-//            menu: contextMenu
+        Column {
+            id: column
             width: parent.width
-//            ListView.onRemove: animateRemoval(listItem)
+            spacing: Theme.paddingSmall
 
-            onClicked: {
-                console.log("Showing trip: " + tripId)
-                pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
-                      {"recId": tripId, callback: updateAfterDialog})
+            PageHeader {
+                id: pageHeader
+                title: qsTr("Trips")
             }
 
-            Rectangle {
-                id: rect
-                width: Theme.paddingMedium
-                height: parent.height - Theme.paddingSmall * 2
-                anchors {
-                    margins: Theme.paddingMedium
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
+//            ButtonLayout {
+//                Button {
+//                    text: "Add Trip"
+//                    icon.source: "image://theme/icon-splus-add"
+//                    onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+//                               {"recId": undefined, "copyFrom": false, callback: updateAfterDialog})
+//                }
+//            }
+
+            ViewPlaceholder {
+                id: placeh
+                enabled: listModel.count === 0
+                text: "No trips yet"
+                hintText: "Pull down to add,\nand/or create some projects"
+            }
+
+            DelegateColumn {
+                model: listModel
+
+                delegate: TwoLineDelegate {
+                    id: tripDelegat
+                    text: tripDate + '  ' + project
+                    description: descriptn
+    //                showOddEven: true
+
+                    property string recId : tripId
+
+                    leftItem:  Item {
+                        width: Theme.itemSizeMedium
+
+                        Rectangle {
+                            id: colRect
+                            height: Theme.itemSizeMedium * 0.5
+                            width: Theme.itemSizeMedium * 0.15
+                            radius: width
+                            anchors {
+                                left: parent.left
+                                verticalCenter: parent.verticalCenter
+                            }
+                            color: bgColor
+                        }
+
+                        DelegateInfoItem {
+                            id: kmItem
+                            text: kilometer
+                            description: qsTr("km")
+                            alignment: Qt.AlignHCenter
+                            anchors {
+                                left: colRect.right
+                                verticalCenter: colRect.verticalCenter
+                            }
+                        }
+
+                    }
+
+                    rightItem: DelegateIconButton {
+                        iconSource: "image://theme/icon-m-clipboard"
+                        iconSize: Theme.iconSizeMedium
+                        onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+                                   {"recId": recId, "copyFrom": true, callback: updateAfterDialog})
+                    }
+
+                    menu: ContextMenu {
+                        MenuItem {
+                            text: qsTr("Show Trip details")
+                            onClicked: {
+                                console.log("Showing trip: " + recId)
+                                pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
+                                      {"recId": recId, callback: updateAfterDialog})
+                            }
+                        }
+                    }
                 }
-                color: bgColor ? bgColor : "#555555"
-                opacity: 1
             }
 
-            Label {
-                id: km
-                text: kilometer
-                font.pixelSize: Theme.fontSizeLarge
-                color: Theme.primaryColor
-                width: parent.width * 0.2
-                anchors {
-                    top: parent.top
-                    bottom: parent.bottom
-                    left: rect.right
-                    margins: Theme.paddingSmall
-                }
-            }
-
-            Label {
-                id: date
-                text: tripDate
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.primaryColor
-                anchors {
-                    top: parent.top
-                    left: km.right
-                    margins: Theme.paddingSmall
-                }
-            }
-
-            Label {
-                id: proj
-                text: project
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.primaryColor
-                width: parent.width * 0.4
-                anchors {
-                    top: parent.top
-                    right: parent.right
-                    margins: Theme.paddingSmall
-                }
-            }
-
-            Label {
-                id: desc
-                text: descriptn
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.secondaryColor
-                width: parent.width * 0.8
-                anchors {
-                    top: date.bottom
-                    left: km.right
-                    right: parent.right
-                    margins: Theme.paddingSmall
-                }
-            }
-
-            Separator {
-                width: parent.width
-                color: Theme.secondaryColor
-            }
+//            Rectangle {
+//                id: rect
+//                width: Theme.paddingMedium
+//                height: parent.height - Theme.paddingSmall * 2
+//                anchors {
+//                    margins: Theme.paddingMedium
+//                    left: parent.left
+//                    verticalCenter: parent.verticalCenter
+//                }
+//                color: bgColor ? bgColor : "#555555"
+//                opacity: 1
+//            }
         }
 
         PullDownMenu {
-//            MenuItem {
-//                text: qsTr("About")
-//                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
-//            }
-//            MenuItem {
-//                text: qsTr("Settings")
-//                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
-//                                          {callback: updateAfterDialog})
-//            }
             MenuItem {
                 text: qsTr("Totals")
                 onClicked: pageStack.push(Qt.resolvedUrl("TotalsPage.qml"))
@@ -190,8 +166,20 @@ Page {
             MenuItem {
                 text: qsTr("Add trip")
                 onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-                                          {"recId": undefined, callback: updateAfterDialog})
+                           {"recId": undefined, "copyFrom": false, callback: updateAfterDialog})
             }
+        }
+
+        PushUpMenu {
+            MenuItem {
+                text: qsTr("About")
+                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
+            }
+    //            MenuItem {
+    //                text: qsTr("Settings")
+    //                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
+    //                                          {callback: updateAfterDialog})
+    //            }
         }
     }
 }

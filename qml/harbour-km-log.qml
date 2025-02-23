@@ -9,7 +9,7 @@ ApplicationWindow
 {
     id: generic
 
-    property string version    : "0.2"
+    property string version    : "0.3"
     property string dbversion  : "0.1"
     property var    dbhandler  : DB.openDatabase(dbversion)
     property bool   debug      : false
@@ -23,9 +23,8 @@ ApplicationWindow
     property bool deleteDatabase          : DB.getSetting( "deleteDatabase"   , false ) || tempDelDB
     property bool hideArchivedTrips       : DB.getSetting( "hideArchivedTrips", false )
 
-
-    property var tripId
-    property var projId
+//    property var tripId
+//    property var projId
 
     Component.onCompleted: { DB.openDatabase() }
 
