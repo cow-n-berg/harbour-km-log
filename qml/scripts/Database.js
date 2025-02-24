@@ -207,7 +207,9 @@ function getProjects() {
                    kmTarget, \
                    isTarget, \
                    projType, \
-                   bgColor \
+                   bgColor, \
+                   printf('%,.2f', price) AS txtPrice, \
+                   printf('%,.0f', kmTarget) AS txtKmTarget \
               FROM km_proj \
              ORDER BY project \
             ;");

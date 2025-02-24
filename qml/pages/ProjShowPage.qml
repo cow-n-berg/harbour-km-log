@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
 
@@ -12,7 +13,7 @@ Dialog {
     property var callback
     property var template
 
-    property bool   addNewProj  : true
+    property bool   addNewProj : true
     property string project
     property bool   invoiced
     property string price
@@ -20,6 +21,8 @@ Dialog {
     property bool   isTarget
     property string projType
     property string bgColor
+    property int    kmTotal    : 0
+    property string strKmTotal
 
     property bool somethingHasChanged : false
 
@@ -38,20 +41,36 @@ Dialog {
         }
     }
 
+    ListModel {
+        id: listModel
+    }
+
     function getThisProj(projId) {
         // Available in a Project
-        // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+        // project, invoiced, price, kmTarget, isTarget, projType, bgColor, txtPrice, txtKmTarget
 
-            var proj = Database.getOneProj(projId)
-            console.log("This project: " + JSON.stringify(proj))
-            project      = proj.project
-            txtProj.text = proj.project
-            invoiced     = proj.invoiced
-            isTarget     = proj.isTarget
-            txtPric.text = proj.price
-            txtTarg.text = proj.kmTarget
-            txtType.text = proj.projType
-            colorIndicator.color = proj.bgColor
+        var proj = Database.getOneProj(projId)
+        console.log("This project: " + JSON.stringify(proj))
+        project      = proj.project
+        txtProj.text = proj.project
+        invoiced     = proj.invoiced
+        isTarget     = proj.isTarget
+        txtPric.text = proj.price
+        txtTarg.text = proj.kmTarget
+        txtType.text = proj.projType
+        colorIndicator.color = proj.bgColor
+
+        // Show the trips from the project too
+        listModel.clear();
+        kmTotal = 0;
+        var trips = Database.getTrips(projId);
+        for (var i = 0; i < trips.length; ++i) {
+            listModel.append(trips[i]);
+            kmTotal += trips[i].kilometer;
+//            console.log( JSON.stringify(trips[i]));
+        }
+        strKmTotal = kmTotal.toString();
+        console.log( "listModel trips updated");
     }
 
     Component.onCompleted: getThisProj(recId);
@@ -139,6 +158,73 @@ Dialog {
                 readOnly: true
                 color: Theme.primaryColor
                 visible: isTarget
+            }
+
+            Separator {
+                width: parent.width
+                color: Theme.secondaryColor
+            }
+
+            Item {
+                height: Theme.itemSizeMedium
+                width: parent.width
+
+                Label {
+                    id: lblTotal
+                    text: qsTr("The project's current total: ") + strKmTotal + qsTr(" km")
+                    font.pixelSize: Theme.fontSizeMedium
+                    color: Theme.primaryColor
+                    anchors {
+                        margins: Theme.paddingLarge
+                        horizontalCenter: parent.horizontalCenter
+                        verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
+            Separator {
+                width: parent.width
+                color: Theme.secondaryColor
+            }
+
+            DelegateColumn {
+                model: listModel
+
+                delegate: TwoLineDelegate {
+                    id: tripDelegat
+                    text: tripDate + '  ' + project
+                    description: descriptn
+    //                showOddEven: true
+
+                    property string recId : tripId
+
+                    leftItem:  Item {
+                        width: Theme.itemSizeMedium
+
+                        Rectangle {
+                            id: colRect
+                            height: Theme.itemSizeMedium * 0.5
+                            width: Theme.itemSizeMedium * 0.15
+                            radius: width
+                            anchors {
+                                left: parent.left
+                                verticalCenter: parent.verticalCenter
+                            }
+                            color: bgColor
+                        }
+
+                        DelegateInfoItem {
+                            id: kmItem
+                            text: kilometer
+                            description: qsTr("km")
+                            alignment: Qt.AlignHCenter
+                            anchors {
+                                left: colRect.right
+                                verticalCenter: colRect.verticalCenter
+                            }
+                        }
+                    }
+                }
             }
 
         }

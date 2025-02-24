@@ -50,23 +50,6 @@ function replString(str, repl) {
 /*
 *  Building up an icon url
 */
-function coverIconUrl(darkTheme, nightMode) {
-    var url;
-    var filename = "../images/icon-cover-";
-    if (nightMode){
-        filename += "black.svg";
-    }
-    else if (darkTheme) {
-        filename += "white.svg";
-    }
-    else {
-        filename += "black.svg";
-    }
-    url = Qt.resolvedUrl(filename)
-//    console.log(url);
-    return url
-}
-
 function iconUrl(icon, darkTheme) {
     var url;
     var filename = "../images/" + icon + "-";

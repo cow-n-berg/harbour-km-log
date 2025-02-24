@@ -130,6 +130,7 @@ Dialog {
                     height: Theme.itemSizeMedium * 0.5
                     width: height
                     radius: Theme.itemSizeMedium * 0.15
+                    anchors.verticalCenter: parent.verticalCenter
                 }
                 Label {
                     text: "Color"

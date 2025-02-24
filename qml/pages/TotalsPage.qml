@@ -71,11 +71,18 @@ Page {
                          height: width
 
                          Rectangle {
-                             anchors.fill: parent
+                             id: colRect
+                             height: Theme.itemSizeMedium * 0.5
+                             width: height
+                             radius: Theme.itemSizeMedium * 0.15
+                             anchors {
+                                 left: parent.left
+                                 verticalCenter: parent.verticalCenter
+                             }
                              color: bgColor
                          }
+                    }
 
-                     }
                     rightItem: DelegateInfoItem {
                         text: txtKm
                         description: qsTr("km")

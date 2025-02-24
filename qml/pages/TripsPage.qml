@@ -117,7 +117,7 @@ Page {
                     }
 
                     rightItem: DelegateIconButton {
-                        iconSource: "image://theme/icon-m-clipboard" // TF.iconUrl("icon-copy", Theme.colorScheme === Theme.LightOnDark)
+                        iconSource: "image://theme/icon-m-clipboard"
                         iconSize: Theme.iconSizeMedium
                         onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
                                    {"recId": recId, "copyFrom": true, callback: updateAfterDialog})
@@ -130,19 +130,6 @@ Page {
                     }
                 }
             }
-
-//            Rectangle {
-//                id: rect
-//                width: Theme.paddingMedium
-//                height: parent.height - Theme.paddingSmall * 2
-//                anchors {
-//                    margins: Theme.paddingMedium
-//                    left: parent.left
-//                    verticalCenter: parent.verticalCenter
-//                }
-//                color: bgColor ? bgColor : "#555555"
-//                opacity: 1
-//            }
         }
 
         PullDownMenu {

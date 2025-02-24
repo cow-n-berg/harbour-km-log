@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
 
@@ -15,7 +16,7 @@ Page {
     function updateAfterDialog(updated) {
         if (updated) {
             listModel.update()
-            listView.scrollToTop()
+            flick.scrollToTop()
         }
     }
 
@@ -38,139 +39,89 @@ Page {
         }
     }
 
-    Component.onCompleted: listModel.update();
+    Component.onCompleted: listModel.update()
 
-    SilicaListView {
-        id: listView
-        model: listModel
+    SilicaFlickable {
+        id: flick
+        anchors.fill: parent
 
-        anchors {
-            fill: parent
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
-        }
-
-        spacing: Theme.paddingMedium
-
-        header: PageHeader {
-            id: pageHeader
-            title: qsTr("Projects") //+ "     "
+        VerticalScrollDecorator {
+            flickable: flick
         }
 
         quickScroll : true
 
-        VerticalScrollDecorator {}
-
-        ViewPlaceholder {
-            id: placeh
-            enabled: listModel.count === 0
-            text: "No projects yet"
-            hintText: "Pull down to add"
-        }
-
-        delegate: ListItem {
-            id: listItem
-            menu: contextMenu
+        Column {
+            id: column
             width: parent.width
-//            contentHeight: Theme.itemSizeSmall
-//            ListView.onRemove: animateRemoval(listItem)
+            spacing: Theme.paddingSmall
 
-            onClicked: {
-                console.log("Clicked proj " + index)
-                pageStack.push(Qt.resolvedUrl("ProjShowPage.qml"),
-                               {"recId": project, callback: updateAfterDialog})
+            PageHeader {
+                id: pageHeader
+                title: qsTr("Projects")
             }
 
-            Rectangle {
-                id: rect
-                height: Theme.itemSizeMedium * 0.5
-                width: Theme.itemSizeMedium * 0.15
-                radius: width
-                anchors {
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-                color: bgColor ? bgColor : "#555555"
-                opacity: 1
-//                Label {
-//                    text: ""
-//                }
+            ViewPlaceholder {
+                id: placeh
+                enabled: listModel.count === 0
+                text: "No projects yet"
+                hintText: "Pull down to add"
             }
 
-            Label {
-                id: proj
-                text: project
-                font.pixelSize: Theme.fontSizeMedium
-                color: Theme.primaryColor
-                anchors {
-                    left: rect.right
-                    right: parent.right
-                    margins: Theme.paddingSmall
-                }
-            }
+            DelegateColumn {
+                model: listModel
 
-            Label {
-                id: desc
-                text: projType + ' | ' + (invoiced ? qsTr("Invoiced @ ") + (price ? price.toString() : "0") : qsTr("Priceless")) + ' | ' + (isTarget ? qsTr("Target: ") + kmTarget : qsTr("No Target"))
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.secondaryColor
-                anchors {
-                    top: proj.bottom
-                    left: rect.right
-                    right: parent.right
-                    margins: Theme.paddingSmall
-                }
-            }
+                delegate: TwoLineDelegate {
+                    id: projDelegat
+                    text: project
+                    description: projType + ' | ' + (invoiced ? qsTr("Invoiced @ ") + (price ? price.toString() : "0") : qsTr("Priceless")) + ' | ' + (isTarget ? qsTr("Target: ") + kmTarget : qsTr("No Target"))
 
-            Separator {
-                width: parent.width
-                color: Theme.secondaryColor
-            }
+                    property string recId : project
 
-            RemorsePopup { id: remorse }
+                    leftItem:  Item {
+                        width: Theme.itemSizeMedium
 
-            Component {
-                id: contextMenu
-                ContextMenu {
-                    MenuItem {
-                        text: "Edit project"
-                        onClicked: {
-                            pageStack.push(Qt.resolvedUrl("ProjAddPage.qml"),
-                                           {"recId": project, callback: updateAfterDialog})
+                        Rectangle {
+                            id: colRect
+                            height: Theme.itemSizeMedium * 0.5
+                            width: Theme.itemSizeMedium * 0.15
+                            radius: width
+                            anchors {
+                                left: parent.left
+                                verticalCenter: parent.verticalCenter
+                            }
+                            color: bgColor
                         }
+
+                        DelegateInfoItem {
+//                            id: lftItem
+                            text: isTarget ? txtKmTarget : txtPrice
+                            alignment: Qt.AlignHCenter
+                            anchors {
+                                left: colRect.right
+                                verticalCenter: colRect.verticalCenter
+                            }
+                        }
+
                     }
-                    MenuItem {
-                        text: qsTr("Delete this project")
-                        onClicked: remorse.execute("Deleting project", function() {
-                            console.log("Remove project " + project)
-                            Database.deleteProj(project)
-                            updateAfterDialog(true)
-                        })
+
+//                    rightItem: DelegateIconButton {
+//                        iconSource: "image://theme/icon-m-clipboard"
+//                        iconSize: Theme.iconSizeMedium
+//                        onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+//                                   {"recId": recId, "copyFrom": true, callback: updateAfterDialog})
+//                    }
+
+                    onClicked: {
+                        console.log("Clicked proj " + index)
+                        pageStack.push(Qt.resolvedUrl("ProjShowPage.qml"),
+                              {"recId": recId, callback: updateAfterDialog})
                     }
                 }
             }
         }
 
         PullDownMenu {
-            MenuItem {
-                text: qsTr("Show Contents DB in Console")
-                enabled: generic.debug
-                visible: generic.debug
-                onClicked: Database.showAllData()
-            }
-//            MenuItem {
-//                text: qsTr("About")
-//                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
-//            }
-//            MenuItem {
-//                text: qsTr("Settings")
-//                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
-//                                          {callback: updateAfterDialog})
-//            }
-//            MenuItem {
-//                text: qsTr("View projects")
-//                onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"))
-//            }
             MenuItem {
                 text: qsTr("Add project")
                 onClicked: pageStack.push(Qt.resolvedUrl("ProjAddPage.qml"),
