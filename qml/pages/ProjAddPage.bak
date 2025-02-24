@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../modules/Opal/ComboData"
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
 
@@ -38,21 +39,29 @@ Dialog {
         console.log("New project: " + project )
         // addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
         Database.addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
-        dialog.callback(true, project)
+        dialog.callback(true)
     }
 
     onRejected: {
         dialog.callback(false)
     }
 
-    function getThisProj(recId) {
-        // Available in a Project
-        // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+    onOpened: fillCombo()
 
+    ListModel {
+        id: typeModel
+    }
+
+    function fillCombo() {
         // Setting up the ListModel
         for (var i = 0; i < boxList.length; ++i) {
             typeModel.append( { listText: boxList[i] });
         }
+    }
+
+    function getThisProj(recId) {
+        // Available in a Project
+        // project, invoiced, price, kmTarget, isTarget, projType, bgColor
 
         if (recId === undefined) {
             console.log("New project, providing defaults")
@@ -80,12 +89,12 @@ Dialog {
         }
 
         // set the ComboBox right
-        for (i = 0; i < boxList.length; i++) {
-            if (boxList[i] === projType) {
-                boxIndex = i;
-            }
-        }
-        typeBox.currentIndex = boxIndex;
+//        for (i = 0; i < boxList.length; i++) {
+//            if (boxList[i] === projType) {
+//                boxIndex = i;
+//            }
+//        }
+//        typeBox.currentIndex = boxIndex;
     }
 
     DialogHeader {
@@ -93,11 +102,7 @@ Dialog {
         title: (addNewProj ? "Add project" : "Edit project")
     }
 
-    Component.onCompleted: getThisProj(recId);
-
-    ListModel {
-        id: typeModel
-    }
+//    Component.onCompleted: getThisProj(recId);
 
     Column {
         id: column
@@ -127,9 +132,10 @@ Dialog {
                 spacing: Theme.paddingMedium
                 Rectangle {
                     id: colorIndicator
-                    height: Theme.itemSizeMedium * 0.5
+
                     width: height
-                    radius: Theme.itemSizeMedium * 0.15
+                    height: parent.height
+//                    color: "#777777"
                 }
                 Label {
                     text: "Color"
@@ -155,17 +161,26 @@ Dialog {
         ComboBox {
             id: typeBox
             label: "Type of project"
+
+            property string currentData  // expose ComboData.currentData - remove if not needed
+            property var indexOfData  // expose ComboData.indexOfData - remove if not needed
+            ComboData { dataRole: "value" }
+
             menu: ContextMenu {
                 Repeater {
                     model: typeModel
                     MenuItem {
-                        text: listText;
+                        property string value: listText
+                        text: listText
                         onClicked: {
                             console.log("ComboBox onClicked: " + listText)
                             projType = listText
                         }
                     }
                 }
+            }
+            Component.onCompleted: {
+                currentIndex = indexOfData(projType)
             }
         }
 

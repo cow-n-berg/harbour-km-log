@@ -117,21 +117,16 @@ Page {
                     }
 
                     rightItem: DelegateIconButton {
-                        iconSource: "image://theme/icon-m-clipboard"
+                        iconSource: "image://theme/icon-m-clipboard" // TF.iconUrl("icon-copy", Theme.colorScheme === Theme.LightOnDark)
                         iconSize: Theme.iconSizeMedium
                         onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
                                    {"recId": recId, "copyFrom": true, callback: updateAfterDialog})
                     }
 
-                    menu: ContextMenu {
-                        MenuItem {
-                            text: qsTr("Show Trip details")
-                            onClicked: {
-                                console.log("Showing trip: " + recId)
-                                pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
-                                      {"recId": recId, callback: updateAfterDialog})
-                            }
-                        }
+                    onClicked: {
+                        console.log("Showing trip: " + recId)
+                        pageStack.push(Qt.resolvedUrl("TripShowPage.qml"),
+                              {"recId": recId, callback: updateAfterDialog})
                     }
                 }
             }

@@ -32,11 +32,11 @@ Dialog {
         console.log("New trip: " + "|" + tripDate + "|" + description + "|" + km + "|" + proj)
         // addTrip(tripId, tripDate, descriptn, kilometer, project)
         Database.addTrip(tripId, tripDate, description, km, proj)
-        dialog.callback(true)
+        dialog.callback(true, tripId)
     }
 
     onRejected: {
-        dialog.callback(false)
+        dialog.callback(false, tripId)
     }
 
     ListModel {

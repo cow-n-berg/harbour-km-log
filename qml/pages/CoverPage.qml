@@ -27,7 +27,7 @@ CoverBackground {
 
     Image {
         id: backgroundImage
-        source: TF.coverIconUrl(Theme.colorScheme === Theme.LightOnDark, Theme.nightCacheMode)
+        source: TF.iconUrl("icon-cover", Theme.colorScheme === Theme.LightOnDark)
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
         opacity: 0.15

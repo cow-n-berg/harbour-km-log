@@ -67,13 +67,10 @@ function coverIconUrl(darkTheme, nightMode) {
     return url
 }
 
-function copyIconUrl(darkTheme, nightMode) {
+function iconUrl(icon, darkTheme) {
     var url;
-    var filename = "../images/icon-cover-copy-";
-    if (nightMode){
-        filename += "white.svg";
-    }
-    else if (darkTheme) {
+    var filename = "../images/" + icon + "-";
+if (darkTheme) {
         filename += "white.svg";
     }
     else {

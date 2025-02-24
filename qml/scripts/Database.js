@@ -146,53 +146,15 @@ function initializeDatabase( dbH ) {
     console.log("Set up views");
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            CREATE VIEW IF NOT EXISTS allTrips AS
-            SELECT t.tripId, \
-                   t.tripDate, \
-                   t.descriptn, \
-                   t.kilometer, \
-                   t.project, \
-                   ifnull(p.price, 0) AS price, \
-                   ifnull(p.isTarget, 0) AS isTarget, \
-                   ifnull(p.bgColor, '#777777') AS bgColor \
-              FROM km_trip t \
-              LEFT OUTER JOIN km_proj p ON p.project = t.project \
-             ORDER BY t.tripDate DESC, t.tripId \
-            ;");
+            DROP VIEW IF EXISTS allTrips;");
     });
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            CREATE VIEW IF NOT EXISTS showTotals AS
-            SELECT p.project, \
-                   p.invoiced, \
-                   p.price, \
-                   p.isTarget, \
-                   p.projType, \
-                   p.bgColor, \
-                   SUM(IFNULL(t.kilometer, 0)) AS kmTotal, \
-                   SUM(CASE WHEN p.isTarget THEN 0 ELSE IFNULL(t.kilometer * p.price, 0) END) AS amount \
-              FROM km_proj p \
-              LEFT OUTER JOIN km_trip t ON p.project = t.project \
-             GROUP BY p.project \
-             ORDER BY p.project \
-            ;");
+            DROP VIEW IF EXISTS showTotals;");
     });
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            CREATE VIEW IF NOT EXISTS showInvoices AS
-            SELECT p.project, \
-                   substr(t.tripDate, 1, 7) AS tripMonth, \
-                   p.invoiced, \
-                   p.price, \
-                   p.isTarget, \
-                   p.bgColor, \
-                   SUM(IFNULL(t.kilometer, 0)) AS kmTotal, \
-                   SUM(CASE WHEN p.isTarget THEN 0 ELSE IFNULL(t.kilometer * p.price, 0) END) AS amount \
-              FROM km_proj p \
-              LEFT OUTER JOIN km_trip t on p.project = t.project \
-             GROUP BY p.invoiced, p.project, tripMonth \
-             ORDER BY p.invoiced DESC, tripMonth DESC, p.project \
-            ;");
+            DROP VIEW IF EXISTS showInvoices;");
     });
 
     console.log("initialization completed");

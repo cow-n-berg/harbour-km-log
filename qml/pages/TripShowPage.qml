@@ -27,7 +27,7 @@ Dialog {
         dialog.callback(somethingHasChanged)
     }
 
-    function updateAfterDialog(updated) {
+    function updateAfterDialog(updated, trId) {
         if (updated) {
             somethingHasChanged = true
             prepareTrip(trId)
@@ -36,7 +36,7 @@ Dialog {
 
     function prepareTrip(trId) {
         console.log("Prepare for showing: " + JSON.stringify(recId))
-        var trip = Database.getOneTrip(recId)
+        var trip = Database.getOneTrip(trId)
         console.log("Getting this trip for showing: " + JSON.stringify(trip))
         tripId       = trip.tripId
         txtDate.text = trip.tripDate
@@ -66,11 +66,13 @@ Dialog {
 
         Rectangle {
             id: colorIndicator
-            width: Theme.iconSizeMedium
-            height: width
+            height: Theme.itemSizeMedium * 0.5
+            width: height
+            radius: Theme.itemSizeMedium * 0.15
             anchors {
                 verticalCenter: pageHeader.verticalCenter
                 right: parent.right
+                rightMargin: Theme.paddingMedium
             }
         }
 

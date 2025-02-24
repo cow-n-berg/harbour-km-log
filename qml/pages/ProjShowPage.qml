@@ -31,18 +31,18 @@ Dialog {
         dialog.callback(somethingHasChanged)
     }
 
-    function updateAfterDialog(updated) {
+    function updateAfterDialog(updated, proj) {
         if (updated) {
             somethingHasChanged = true
-            getThisProj(recId)
+            getThisProj(proj)
         }
     }
 
-    function getThisProj(recId) {
+    function getThisProj(projId) {
         // Available in a Project
         // project, invoiced, price, kmTarget, isTarget, projType, bgColor
 
-            var proj = Database.getOneProj(recId)
+            var proj = Database.getOneProj(projId)
             console.log("This project: " + JSON.stringify(proj))
             project      = proj.project
             txtProj.text = proj.project
@@ -80,6 +80,7 @@ Dialog {
             anchors {
                 verticalCenter: pageHeader.verticalCenter
                 right: parent.right
+                rightMargin: Theme.paddingMedium
             }
         }
 
