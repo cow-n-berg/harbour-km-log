@@ -304,7 +304,7 @@ function showInvoices() {
                    price, \
                    printf('%,.0f', kilometer) AS txtKm, \
                    printf('%,.2f', price) AS txtPrice, \
-                   printf('%,.f', amount) AS txtAmount, \
+                   printf('%,.2f', amount) AS txtAmount, \
                    CASE WHEN detail = 0 \
                         THEN printf('A total of %,.0f km', kilometer) \
                         ELSE printf('%,.0f km @ %,.2f', kilometer, price) \
