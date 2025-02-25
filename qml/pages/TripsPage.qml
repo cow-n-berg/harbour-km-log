@@ -134,12 +134,8 @@ Page {
 
         PullDownMenu {
             MenuItem {
-                text: qsTr("Totals")
-                onClicked: pageStack.push(Qt.resolvedUrl("TotalsPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Invoices")
-                onClicked: pageStack.push(Qt.resolvedUrl("ReportPage.qml"))
+                text: qsTr("Reports")
+                onClicked: pageStack.push(Qt.resolvedUrl("ReportsPage.qml"))
             }
             MenuItem {
                 text: qsTr("Projects")
