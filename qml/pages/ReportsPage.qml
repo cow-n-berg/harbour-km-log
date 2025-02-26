@@ -5,10 +5,6 @@ import "../modules/Opal/Tabs"
 Page {
     id: root
 
-//    anchors {
-//        fill: parent
-//    }
-
     allowedOrientations: Orientation.Portrait
 
     TabView {
@@ -21,9 +17,6 @@ Page {
             id: targTab
             title: qsTr("Targets")
 
-//            Label {
-//                text: "test Targets"
-//            }
 
             Component {
                 TargetTab { }
@@ -34,9 +27,6 @@ Page {
             id: invcTab
             title: qsTr("Invoices")
 
-//            Label {
-//                text: "test Invoices"
-//            }
             Component {
                 InvoiceTab { }
             }
@@ -46,10 +36,9 @@ Page {
             id: exptTab
             title: qsTr("Export csv")
 
-//            Label {
-//                text: "test Export"
-//            }
-//            Component { }
+            Component {
+                ExportTab { }
+            }
         }
     }
 }

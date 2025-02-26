@@ -15,6 +15,7 @@ TARGET = harbour-km-log
 CONFIG += sailfishapp_qml
 
 DISTFILES += qml/harbour-km-log.qml \
+    qml/pages/ExportTab.qml \
     qml/pages/InvoiceTab.qml \
     qml/pages/ProjShowPage.qml \
     qml/pages/ReportsPage.qml \

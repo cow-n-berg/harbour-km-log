@@ -22,9 +22,8 @@ ApplicationWindow
     property bool coverShowAppName        : DB.getSetting( "coverShowAppName" , false )
     property bool deleteDatabase          : DB.getSetting( "deleteDatabase"   , false ) || tempDelDB
     property bool hideArchivedTrips       : DB.getSetting( "hideArchivedTrips", false )
-
-//    property var tripId
-//    property var projId
+    property string csvSeparator          : DB.getSetting( "csvSeparator"     , ',' )
+    property string csvDecimal            : DB.getSetting( "csvDecimal"       , '.' )
 
     Component.onCompleted: { DB.openDatabase() }
 

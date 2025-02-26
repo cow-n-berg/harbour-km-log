@@ -17,4 +17,10 @@ OrganizationName=nl.cow-n-berg
 # ApplicationName does not have to be identical to Name
 ApplicationName=km-log
 # Add the required permissions here
-Permissions=
+# Permissions=Notifications
+
+[X-HarbourBackup]
+# BackupPathList=.local/share/harbour-km-log/
+# BackupConfigList=/apps/harbour-km-log/
+BackupPathList=.local/share/nl.cow-n-berg/harbour-km-log/
+BackupConfigList=/apps/nl.cow-n-berg/harbour-km-log/

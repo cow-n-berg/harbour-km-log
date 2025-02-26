@@ -182,8 +182,8 @@ function getTrips(filterProject) {
     if (typeof filterProject == "string")
         query += "WHERE t.project = '" + filterProject + "' ";
 
-    query += "ORDER BY t.tripDate DESC, t.tripId;";
-    console.log(query);
+    query += "ORDER BY t.tripDate DESC, t.tripId DESC;";
+//    console.log(query);
 
     db.transaction(function(tx) {
         var rs = tx.executeSql(query);
@@ -347,6 +347,88 @@ function showInvoices() {
     return totals;
 }
 
+function showCsvTrips(separat, decimal) {
+    // separat = ';';
+    // decimal = ',';
+    var keys  = ["tripDate", "descriptn", "kilometer", "project", "invoiced", "price", "amount", "isTarget", "kmTarget", "projType"]
+    var head  = ["trip date", "description", "kilometer", "project", "invoiced", "price", "amount", "target", "target km", "project type"];
+    var trips = [];
+    var rs, list, len, csv, vals;
+    var k, i, j, s;
+
+    console.log("showCsvTrip ");
+    var db = databaseHandler || openDatabase();
+    var query = "\
+            SELECT t.tripDate, \
+                   t.descriptn, \
+                   t.kilometer, \
+                   t.project, \
+                   ifnull(p.invoiced, 0) AS invoiced, \
+                   ifnull(p.price, 0) AS price, \
+                   ifnull(p.price, 0) * kilometer AS amount, \
+                   ifnull(p.isTarget, 0) AS isTarget, \
+                   ifnull(p.kmTarget, 0) AS kmTarget, \
+                   ifnull(p.projType, 0) AS projType \
+              FROM km_trip t \
+              LEFT OUTER JOIN km_proj p ON p.project = t.project \
+             ORDER BY t.tripDate DESC, t.tripId DESC;";
+
+    db.transaction(function(tx) {
+        rs = tx.executeSql(query);
+        list = rs.rows;
+        len  = list.length;
+
+        // Dutch style csv
+
+        if (len > 0) {
+            k = keys.length;
+
+            // Writing keys
+            csv  = '';
+            for (i = 0; i < k; i++) {
+                csv += '"' + head[i] + '"' + separat;
+            }
+            trips.push({ "csvLine": csv });
+            console.log(csv);
+
+            // Writing values
+            for (j = 0; j < len; j++) {
+                vals = list[j];
+                csv  = '';
+                for (i = 0; i < k; i++) {
+                    s = vals[keys[i]];
+//                    if (typeof s === "number" && s === 0)
+//                        s = 0;
+//                    else if (typeof s === "number" && s === 0)
+//                        s = vals[keys[i]] || 'error';
+
+                    if (typeof s === "number") {
+                        s = s.toString();
+                        if (Math.round(s) !== s)
+                            s = s.replace(".", decimal);  // Dutch style csv
+                    }
+                    else if (typeof s === "object") {
+                        s = JSON.stringify(s);
+                        // Properly display time without T and Z
+                        s = s.replace(/([0-9]+-[0-9]+-[0-9]+)T([0-9]+:[0-9]+:[0-9]+).000Z/g, function(a, b, c) { return b + ' ' + c });
+                    }
+
+                    if (typeof s === "string") {
+                        csv += '"' + s + '"' + separat;
+                    }
+                    else {
+                        csv += s + separat;
+                    }
+                }
+                trips.push({ "csvLine": csv });
+                console.log(csv);
+            }
+        }
+    });
+
+    return trips;
+}
+
 function showAllData() {
     var rs
     console.log("showAllData ");
@@ -439,7 +521,6 @@ function getOneProj(project) {
     });
 
     return projt;
-
 }
 
 /*

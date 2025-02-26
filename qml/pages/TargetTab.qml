@@ -8,10 +8,6 @@ import "../scripts/TextFunctions.js" as TF
 TabItem {
     id: targetTab
 
-//    anchors {
-//        fill: parent
-//    }
-
     ListModel {
         id: listTotal
 
@@ -57,8 +53,6 @@ TabItem {
                 delegate: TwoLineDelegate {
                     text: project
                     description: qsTr("Target is ") + txtKmTarget + qsTr(" km")
-
-//                    showOddEven: true
 
                     leftItem: Item {
                          width: Theme.itemSizeSmall

@@ -110,6 +110,7 @@ Dialog {
         TextField {
             id: txtProj
             focus: true
+            readOnly: addNewProj ? false : true
             width: parent.width
             label: qsTr("Project")
             placeholderText: label

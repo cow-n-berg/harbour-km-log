@@ -32,7 +32,7 @@ Page {
             var trips = Database.getTrips();
             for (var i = 0; i < trips.length; ++i) {
                 listModel.append(trips[i]);
-                console.log( JSON.stringify(trips[i]));
+//                console.log( JSON.stringify(trips[i]));
             }
             console.log( "listModel trips updated");
 //            console.log(JSON.stringify(listModel.get(0)));
@@ -60,15 +60,6 @@ Page {
                 id: pageHeader
                 title: qsTr("Trips")
             }
-
-//            ButtonLayout {
-//                Button {
-//                    text: "Add Trip"
-//                    icon.source: "image://theme/icon-splus-add"
-//                    onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-//                               {"recId": undefined, "copyFrom": false, callback: updateAfterDialog})
-//                }
-//            }
 
             ViewPlaceholder {
                 id: placeh
