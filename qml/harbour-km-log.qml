@@ -9,19 +9,14 @@ ApplicationWindow
 {
     id: generic
 
-    property string version    : "0.3-3"
-    property string dbversion  : "0.1"
+    property string version    : "0.3-6"
+    property string dbversion  : "1.0"
     property var    dbhandler  : DB.openDatabase(dbversion)
     property bool   debug      : false
 
-    // Tzt verwijderen ook uit Database.js
-    property bool tempDelDB    : false
-
-
     // Settings
     property bool coverShowAppName        : DB.getSetting( "coverShowAppName" , false )
-    property bool deleteDatabase          : DB.getSetting( "deleteDatabase"   , false ) || tempDelDB
-    property bool hideArchivedTrips       : DB.getSetting( "hideArchivedTrips", false )
+    property bool deleteDatabase          : DB.getSetting( "deleteDatabase"   , false )
     property string csvSeparator          : DB.getSetting( "csvSeparator"     , ',' )
     property string csvDecimal            : DB.getSetting( "csvDecimal"       , '.' )
 

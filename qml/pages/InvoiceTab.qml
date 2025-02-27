@@ -58,7 +58,6 @@ TabItem {
                     text: project || qsTr("Monthly totals")
                     description: qsTr("Total of ") + txtKm + qsTr(" km @ ") + txtPrice
                     highlighted: detail === 0
-//                    showOddEven: true
 
                     leftItem: DelegateInfoItem {
                         text: tripMonth

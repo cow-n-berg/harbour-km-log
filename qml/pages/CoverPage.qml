@@ -1,29 +1,9 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
-//import Nemo.Notifications 1.0
 import "../scripts/TextFunctions.js" as TF
 
 CoverBackground {
     id: coverPage
-
-//    Notification {
-//        id: notification
-
-//        summary: notify
-//        body: "GMFS"
-//        expireTimeout: 500
-//        urgency: Notification.Low
-//        isTransient: true
-//    }
-
-//    Timer {
-//        id: coverTimer
-//        interval: 5000
-//        running: false
-//        onTriggered: {
-//            coverLabel.text = TF.coverText(gccode, gcname, wpnumb, generic.coverShowAppName)
-//        }
-//    }
 
     Image {
         id: backgroundImage
@@ -38,20 +18,20 @@ CoverBackground {
         Label {
             id: coverLabel
             anchors.centerIn: parent
-            text: coverShowAppName ? "Kilometer" : ""
+            text: generic.coverShowAppName ? "Kilometer" : ""
             color: Theme.primaryColor
         }
     }
-    CoverActionList {
-        CoverAction {
-            iconSource: "image://theme/icon-cover-new"
-            onTriggered: {
-                if (!generic.applicationActive) {
-                    pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-                           {tripId: undefined, callback: undefined})
-                    generic.activate();
-                }
-            }
-        }
-    }
+//    CoverActionList {
+//        CoverAction {
+//            iconSource: "image://theme/icon-cover-new"
+//            onTriggered: {
+//                if (!generic.applicationActive) {
+//                    pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
+//                           {tripId: undefined, callback: undefined})
+//                    generic.activate();
+//                }
+//            }
+//        }
+//    }
 }

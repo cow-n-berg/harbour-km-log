@@ -397,10 +397,6 @@ function showCsvTrips(separat, decimal) {
                 csv  = '';
                 for (i = 0; i < k; i++) {
                     s = vals[keys[i]];
-//                    if (typeof s === "number" && s === 0)
-//                        s = 0;
-//                    else if (typeof s === "number" && s === 0)
-//                        s = vals[keys[i]] || 'error';
 
                     if (typeof s === "number") {
                         s = s.toString();

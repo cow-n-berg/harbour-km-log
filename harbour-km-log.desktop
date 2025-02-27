@@ -15,9 +15,9 @@ Name=Kilometer
 # Replace with your organization as a reverse domain name
 OrganizationName=nl.cow-n-berg
 # ApplicationName does not have to be identical to Name
-ApplicationName=km-log
+ApplicationName=harbour-km-log
 # Add the required permissions here
-# Permissions=Notifications
+Permissions=UserDirs
 
 [X-HarbourBackup]
 # BackupPathList=.local/share/harbour-km-log/

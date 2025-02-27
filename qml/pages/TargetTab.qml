@@ -20,7 +20,7 @@ TabItem {
             var totals = Database.showTotals();
             for (var i = 0; i < totals.length; ++i) {
                 listTotal.append(totals[i]);
-                console.log( JSON.stringify(totals[i]));
+//                console.log( JSON.stringify(totals[i]));
             }
             console.log( "listTotal updated");
         }

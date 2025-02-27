@@ -112,10 +112,10 @@ Dialog {
             focus: true
             readOnly: addNewProj ? false : true
             width: parent.width
-            label: qsTr("Project")
+            label: qsTr("Project") + (addNewProj ? qsTr(" (not editable)") : "")
             placeholderText: label
-            placeholderColor: Theme.secondaryColor
-            color: Theme.primaryColor
+//            placeholderColor: Theme.secondaryColor
+//            color: Theme.primaryColor
             EnterKey.iconSource: "image://theme/icon-m-enter-next"
             EnterKey.onClicked: checkInvc.focus = true
         }
