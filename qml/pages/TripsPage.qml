@@ -7,6 +7,8 @@ import "../scripts/TextFunctions.js" as TF
 Page {
     id: tripsPage
 
+    property int listLength
+
     anchors {
         fill: parent
     }
@@ -30,7 +32,8 @@ Page {
         {
             listModel.clear();
             var trips = Database.getTrips();
-            for (var i = 0; i < trips.length; ++i) {
+            listLength = trips.length;
+            for (var i = 0; i < listLength; ++i) {
                 listModel.append(trips[i]);
 //                console.log( JSON.stringify(trips[i]));
             }
@@ -41,9 +44,13 @@ Page {
 
     Component.onCompleted: listModel.update()
 
+//    SilicaListView {
     SilicaFlickable {
         id: flick
         anchors.fill: parent
+//        contentWidth: column.width
+        contentHeight: listLength * Theme.itemSizeLarge
+        flickableDirection: Flickable.VerticalFlick
 
         VerticalScrollDecorator {
             flickable: flick
@@ -69,13 +76,13 @@ Page {
             }
 
             DelegateColumn {
+                id: colDelegat
                 model: listModel
 
                 delegate: TwoLineDelegate {
                     id: tripDelegat
                     text: tripDate + '  ' + project
                     description: descriptn
-    //                showOddEven: true
 
                     property string recId : tripId
 
@@ -138,17 +145,16 @@ Page {
                            {"recId": undefined, "copyFrom": false, callback: updateAfterDialog})
             }
         }
-
         PushUpMenu {
             MenuItem {
                 text: qsTr("About")
                 onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
             }
-                MenuItem {
-                    text: qsTr("Settings")
-                    onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
-                                              {callback: updateAfterDialog})
-                }
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"),
+                                          {callback: updateAfterDialog})
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ import "../scripts/TextFunctions.js" as TF
 TabItem {
     id: targetTab
 
+    property int listLength
+
     ListModel {
         id: listTotal
 
@@ -18,7 +20,9 @@ TabItem {
         {
             listTotal.clear();
             var totals = Database.showTotals();
-            for (var i = 0; i < totals.length; ++i) {
+            listLength = totals.length;
+            for (var i = 0; i < listLength; ++i) {
+//            for (var i = 0; i < totals.length; ++i) {
                 listTotal.append(totals[i]);
 //                console.log( JSON.stringify(totals[i]));
             }
@@ -31,6 +35,8 @@ TabItem {
     SilicaFlickable {
         id: flick
         anchors.fill: parent
+        contentHeight: listLength * Theme.itemSizeLarge
+        flickableDirection: Flickable.VerticalFlick
 
         VerticalScrollDecorator {
             flickable: flick

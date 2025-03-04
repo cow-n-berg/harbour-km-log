@@ -23,6 +23,7 @@ Dialog {
     property string bgColor
     property int    kmTotal    : 0
     property string strKmTotal
+    property int    listLength
 
     property bool somethingHasChanged : false
 
@@ -64,7 +65,8 @@ Dialog {
         listModel.clear();
         kmTotal = 0;
         var trips = Database.getTrips(projId);
-        for (var i = 0; i < trips.length; ++i) {
+        listLength = trips.length;
+        for (var i = 0; i < listLength; ++i) {
             listModel.append(trips[i]);
             kmTotal += trips[i].kilometer;
 //            console.log( JSON.stringify(trips[i]));
@@ -83,7 +85,10 @@ Dialog {
             leftMargin: Theme.paddingMedium
             rightMargin: Theme.paddingMedium
         }
-        contentHeight: column.height + Theme.itemSizeMedium
+
+//        contentHeight: column.height + Theme.itemSizeMedium
+        contentHeight: (5 +listLength) * Theme.itemSizeLarge
+        flickableDirection: Flickable.VerticalFlick
         quickScroll : true
 
         PageHeader {
@@ -127,12 +132,6 @@ Dialog {
                 color: Theme.primaryColor
             }
 
-//            TextSwitch {
-//                id: checkInvc
-//                text: (checked ? qsTr("Yes, pricing is on") : qsTr("No pricing") )
-//                description: "Priced per kilometer or not?"
-//            }
-
             TextField {
                 id: txtPric
                 width: parent.width
@@ -141,15 +140,6 @@ Dialog {
                 color: Theme.primaryColor
                 visible: invoiced
             }
-
-//            TextSwitch {
-//                id: checkTarg
-//                text: (checked ? qsTr("Yes, a target it is") : qsTr("No, serves another purpose") )
-//                description: "Meant as a target to reach?"
-//                onCheckedChanged: {
-//                    txtTarg.focus = true
-//                }
-//            }
 
             TextField {
                 id: txtTarg

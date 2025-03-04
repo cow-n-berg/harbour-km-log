@@ -7,6 +7,8 @@ import "../scripts/TextFunctions.js" as TF
 Page {
     id: projectsPage
 
+    property int listLength
+
     anchors {
         fill: parent
     }
@@ -30,12 +32,12 @@ Page {
         {
             listModel.clear();
             var projects = Database.getProjects();
-            for (var i = 0; i < projects.length; ++i) {
+            listLength = projects.length;
+            for (var i = 0; i < listLength; ++i) {
                 listModel.append(projects[i]);
                 console.log( JSON.stringify(projects[i]));
             }
             console.log( "listModel projects updated");
-//            console.log(JSON.stringify(listModel.get(0)));
         }
     }
 
@@ -44,6 +46,8 @@ Page {
     SilicaFlickable {
         id: flick
         anchors.fill: parent
+        contentHeight: listLength * Theme.itemSizeLarge
+        flickableDirection: Flickable.VerticalFlick
 
         VerticalScrollDecorator {
             flickable: flick
@@ -104,13 +108,6 @@ Page {
                         }
 
                     }
-
-//                    rightItem: DelegateIconButton {
-//                        iconSource: "image://theme/icon-m-clipboard"
-//                        iconSize: Theme.iconSizeMedium
-//                        onClicked: pageStack.push(Qt.resolvedUrl("TripAddPage.qml"),
-//                                   {"recId": recId, "copyFrom": true, callback: updateAfterDialog})
-//                    }
 
                     onClicked: {
                         console.log("Clicked proj " + index)

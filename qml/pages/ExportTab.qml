@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
-//import Nemo.Notifications 1.0
+import Nemo.Notifications 1.0
 import "../modules/Opal/Delegates"
 import "../modules/Opal/Tabs"
 import "../scripts/Database.js" as Database
@@ -13,6 +13,7 @@ TabItem {
     property string csvDecimal   : generic.csvDecimal
     property string copyMessage  : ""
     property string csv          : ""
+    property int    listLength
 
     ListModel {
         id: listExport
@@ -25,7 +26,8 @@ TabItem {
             listExport.clear();
             csv = ";"
             var csvTrips = Database.showCsvTrips(csvSeparator, csvDecimal);
-            for (var i = 0; i < csvTrips.length; ++i) {
+            listLength = csvTrips.length;
+            for (var i = 0; i < listLength; ++i) {
                 listExport.append(csvTrips[i]);
                 csv += csvTrips[i].csvLine + "\n";
                 console.log( JSON.stringify(csvTrips[i]));
@@ -45,21 +47,23 @@ TabItem {
         }
     }
 
-//    Notification {
-//        id: notification
+    Notification {
+        id: notification
 
-//        summary: copyMessage
-//        body: "Kilometer"
-//        expireTimeout: 500
-//        urgency: Notification.Low
-//        isTransient: true
-//    }
+        summary: copyMessage
+        body: "Kilometer"
+        expireTimeout: 500
+        urgency: Notification.Low
+        isTransient: true
+    }
 
     SilicaFlickable {
         id: flick
         anchors {
             fill: parent
         }
+        contentHeight: listLength * Theme.itemSizeMedium
+        flickableDirection: Flickable.VerticalFlick
 
         VerticalScrollDecorator {
             flickable: flick
@@ -73,7 +77,6 @@ TabItem {
             ButtonLayout {
                 Button {
                     id: iconClipboard
-                    anchors.horizontalCenter: flick.horizontalCenter
 
                     text: qsTr("Click to copy csv to clipboard")
                     icon.source: "image://theme/icon-m-clipboard"
@@ -83,7 +86,7 @@ TabItem {
                         copyMessage = qsTr("csv text copied to clipboard")
                         iconClipboard.icon.color = Theme.highlightColor
                         highlightTimer.start()
-//                        notification.publish()
+                        notification.publish()
                     }
                 }
             }
