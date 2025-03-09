@@ -64,10 +64,33 @@ TabItem {
                         text: tripMonth
                     }
 
-                    rightItem: DelegateInfoItem {
-                        text: txtAmount.replace(".", generic.csvDecimal);
-                        description: qsTr("euro")
-                        alignment: Qt.AlignRight
+                    rightItem: Item {
+                        width: Theme.itemSizeLarge
+
+                        Rectangle {
+                            id: colRect
+                            height: Theme.itemSizeMedium * 0.5
+                            width: Theme.itemSizeMedium * 0.15
+                            radius: width
+                            anchors {
+                                right: infoItem.left
+                                verticalCenter: parent.verticalCenter
+                            }
+                            color: bgColor
+                            visible: detail === 1
+                        }
+
+//                    rightItem: DelegateInfoItem {
+                        DelegateInfoItem {
+                            id: infoItem
+                            text: txtAmount.replace(".", generic.csvDecimal);
+                            description: qsTr("euro")
+                            alignment: Qt.AlignRight
+                            anchors {
+                                right: parent.right
+                                verticalCenter: colRect.verticalCenter
+                            }
+                        }
                     }
                 }
             }

@@ -52,14 +52,14 @@ Dialog {
 
         var proj = Database.getOneProj(projId)
         console.log("This project: " + JSON.stringify(proj))
-        project      = proj.project
-        txtProj.text = proj.project
-        invoiced     = proj.invoiced
-        isTarget     = proj.isTarget
-        txtPric.text = proj.price
-        txtTarg.text = proj.kmTarget
-        txtType.text = proj.projType
-        colorIndicator.color = proj.bgColor
+        project      = proj.project;
+        txtProj.text = proj.project;
+        invoiced     = proj.invoiced;
+        isTarget     = proj.isTarget;
+        txtPric.text = proj.price.toString().replace(".", generic.csvDecimal);
+        txtTarg.text = proj.kmTarget;
+        txtType.text = proj.projType;
+        colorIndicator.color = proj.bgColor;
 
         // Show the trips from the project too
         listModel.clear();

@@ -14,7 +14,7 @@ TabItem {
         id: listTotal
 
         // Available Totals
-        // project, detail, tripMonth, txtKmTarget, txtKm
+        // project, detail, bgColor, tripMonth, txtKmTarget, txtKm, percTarget
 
         function update()
         {
@@ -58,7 +58,7 @@ TabItem {
                 model: listTotal
                 delegate: TwoLineDelegate {
                     text: project
-                    description: qsTr("Target is ") + txtKmTarget + qsTr(" km")
+                    description: percTarget.replace(".", generic.csvDecimal) + qsTr(" of ") + txtKmTarget + qsTr(" km")
                     highlighted: detail === 0
 
                     leftItem: Item {

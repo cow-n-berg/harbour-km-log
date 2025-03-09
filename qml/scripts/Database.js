@@ -275,21 +275,24 @@ function showTotals() {
                    txtKmTarget, \
                    tripMonth, \
                    kilometer AS kmTotal, \
-                   SUBSTR(maxDate, 1, 7) AS maxDate, \
-                   printf('%,.1f', kilometer) AS txtKm \
+                   printf('%,.1f', kilometer) AS txtKm, \
+                   percTarget \
             FROM ( \
                 SELECT 0 AS detail, \
                        p.project, \
                        p.kmTarget, \
                        p.projType, \
                        p.bgColor, \
-                       MAX(t.tripDate) as maxDate, \
                        '' AS tripMonth, \
                        SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
                        printf('%,.0f', p.kmTarget) AS txtKmTarget, \
-                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm, \
+                       CASE WHEN p.kmTarget = 0 \
+                            THEN '0%' \
+                            ELSE printf('%,.1f%%', SUM(IFNULL(t.kilometer, 0)) * 100.0 / p.kmTarget) \
+                            END AS percTarget \
                   FROM km_proj p \
-                  LEFT OUTER JOIN km_trip t ON p.project = t.project \
+                 INNER JOIN km_trip t ON p.project = t.project \
                  WHERE p.isTarget = 1 \
                  GROUP BY p.project \
               UNION \
@@ -298,13 +301,16 @@ function showTotals() {
                        p.kmTarget, \
                        p.projType, \
                        p.bgColor, \
-                       MAX(t.tripDate) as maxDate, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
                        printf('%,.0f', p.kmTarget) AS txtKmTarget, \
-                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm, \
+                       CASE WHEN p.kmTarget = 0 \
+                            THEN '0%' \
+                            ELSE printf('%,.1f%%', SUM(IFNULL(t.kilometer, 0)) * 100.0 / p.kmTarget) \
+                            END AS percTarget \
                   FROM km_proj p \
-                  LEFT OUTER JOIN km_trip t ON p.project = t.project \
+                 INNER JOIN km_trip t ON p.project = t.project \
                  WHERE p.isTarget = 1 \
                  GROUP BY p.project, tripMonth \
             ) \
