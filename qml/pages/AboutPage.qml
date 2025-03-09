@@ -7,7 +7,7 @@ AboutPageBase {
     appVersion: generic.version
 //    appRelease: APP_RELEASE
     description: "<p>"
-                 + qsTr("Kilometer is a log for two purposes.")
+                 + qsTr("Kilometer is a log serving two purposes.")
                  + "</p><p>&nbsp;</p><p>"
                  + qsTr("Firstly, kilometers made per car, to be invoiced to a client and/or to be paid to the owner (e.g. you), to cover the costs.")
                  + "</p><p>&nbsp;</p><p>"
@@ -29,12 +29,22 @@ AboutPageBase {
 
     sourcesUrl: "https://github.com/cow-n-berg/harbour-km-log"
 
-    changelogItems: //[
+    changelogItems: [
         // add new entries at the top
+        ChangelogItem {
+            version: "0.4-1"
+            date: "2025-03-06"
+            paragraphs: "Small changes."
+        },
+        ChangelogItem {
+            version: "0.4-0"
+            date: "2025-03-04"
+            paragraphs: "Published version."
+        },
         ChangelogItem {
             version: "0.3-6"
             date: "2025-02-27"
             paragraphs: "First usable version."
         }
-    //]
+    ]
 }

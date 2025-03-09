@@ -78,7 +78,7 @@ Page {
                 delegate: TwoLineDelegate {
                     id: projDelegat
                     text: project
-                    description: projType + ' | ' + (invoiced ? qsTr("Invoiced @ ") + (price ? price.toString() : "0") : qsTr("Priceless")) + ' | ' + (isTarget ? qsTr("Target: ") + kmTarget : qsTr("No Target"))
+                    description: projType + ' | ' + (invoiced ? qsTr("Invoiced @ ") + txtPrice.replace(".", generic.csvDecimal) : qsTr("Priceless")) + ' | ' + (isTarget ? qsTr("Target: ") + txtKmTarget.replace(".", generic.csvDecimal) : qsTr("No Target"))
 
                     property string recId : project
 
@@ -99,7 +99,7 @@ Page {
 
                         DelegateInfoItem {
 //                            id: lftItem
-                            text: isTarget ? txtKmTarget : txtPrice
+                            text: isTarget ? txtKmTarget.replace(".", generic.csvDecimal) : txtPrice.replace(".", generic.csvDecimal);
                             alignment: Qt.AlignHCenter
                             anchors {
                                 left: colRect.right

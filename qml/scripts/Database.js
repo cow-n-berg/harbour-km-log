@@ -269,18 +269,46 @@ function showTotals() {
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT p.project, \
-                   p.kmTarget, \
-                   p.projType, \
-                   p.bgColor, \
-                   SUM(IFNULL(t.kilometer, 0)) AS kmTotal, \
-                   printf('%,.0f', p.kmTarget) AS txtKmTarget, \
-                   printf('%,.0f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
-              FROM km_proj p \
-              LEFT OUTER JOIN km_trip t ON p.project = t.project \
-             WHERE p.isTarget = 1 \
-             GROUP BY p.project \
-             ORDER BY p.project \
+            SELECT detail, \
+                   project, \
+                   bgColor, \
+                   txtKmTarget, \
+                   tripMonth, \
+                   kilometer AS kmTotal, \
+                   SUBSTR(maxDate, 1, 7) AS maxDate, \
+                   printf('%,.1f', kilometer) AS txtKm \
+            FROM ( \
+                SELECT 0 AS detail, \
+                       p.project, \
+                       p.kmTarget, \
+                       p.projType, \
+                       p.bgColor, \
+                       MAX(t.tripDate) as maxDate, \
+                       '' AS tripMonth, \
+                       SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
+                       printf('%,.0f', p.kmTarget) AS txtKmTarget, \
+                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+                  FROM km_proj p \
+                  LEFT OUTER JOIN km_trip t ON p.project = t.project \
+                 WHERE p.isTarget = 1 \
+                 GROUP BY p.project \
+              UNION \
+                SELECT 1 AS detail, \
+                       p.project, \
+                       p.kmTarget, \
+                       p.projType, \
+                       p.bgColor, \
+                       MAX(t.tripDate) as maxDate, \
+                       SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
+                       SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
+                       printf('%,.0f', p.kmTarget) AS txtKmTarget, \
+                       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+                  FROM km_proj p \
+                  LEFT OUTER JOIN km_trip t ON p.project = t.project \
+                 WHERE p.isTarget = 1 \
+                 GROUP BY p.project, tripMonth \
+            ) \
+            ORDER BY project, detail, tripMonth DESC \
             ;");
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));
@@ -290,6 +318,19 @@ function showTotals() {
     return totals;
 }
 
+//SELECT p.project, \
+//       p.kmTarget, \
+//       p.projType, \
+//       p.bgColor, \
+//       SUM(IFNULL(t.kilometer, 0)) AS kmTotal, \
+//       printf('%,.0f', p.kmTarget) AS txtKmTarget, \
+//       printf('%,.1f', SUM(IFNULL(t.kilometer, 0))) AS txtKm \
+//  FROM km_proj p \
+//  LEFT OUTER JOIN km_trip t ON p.project = t.project \
+// WHERE p.isTarget = 1 \
+// GROUP BY p.project \
+// ORDER BY p.project \
+
 function showInvoices() {
     var totals = [];
     console.log("showInvoices");
@@ -298,20 +339,18 @@ function showInvoices() {
         var rs = tx.executeSql("\
             SELECT detail, \
                    project, \
+                   bgColor, \
                    tripMonth, \
                    amount, \
                    kilometer, \
                    price, \
                    printf('%,.0f', kilometer) AS txtKm, \
                    printf('%,.2f', price) AS txtPrice, \
-                   printf('%,.2f', amount) AS txtAmount, \
-                   CASE WHEN detail = 0 \
-                        THEN printf('A total of %,.0f km', kilometer) \
-                        ELSE printf('%,.0f km @ %,.2f', kilometer, price) \
-                        END AS descr \
+                   printf('%,.2f', amount) AS txtAmount \
             FROM ( \
                 SELECT 0 AS detail, \
                        '' AS project, \
+                       p.bgColor, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        CASE WHEN SUM(IFNULL(t.kilometer, 0)) = 0 \
                             THEN 0 \
@@ -320,18 +359,19 @@ function showInvoices() {
                        SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
                        ROUND(SUM(IFNULL(t.kilometer * p.price, 0)), 2) AS amount \
                   FROM km_trip t \
-                  LEFT OUTER JOIN km_proj p ON p.project = t.project \
+                 INNER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
                  GROUP BY tripMonth \
               UNION \
                 SELECT 1 AS detail, \
                        t.project, \
+                       p.bgColor, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        p.price, \
                        SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
                        ROUND(SUM(IFNULL(t.kilometer * p.price, 0)), 2) AS amount \
                   FROM km_trip t \
-                  LEFT OUTER JOIN km_proj p ON p.project = t.project \
+                 INNER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
                  GROUP BY tripMonth, t.project \
             ) \

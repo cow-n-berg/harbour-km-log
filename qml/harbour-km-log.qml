@@ -9,14 +9,14 @@ ApplicationWindow
 {
     id: generic
 
-    property string version    : "0.4-0"
+    property string version    : "0.4-3"
     property string dbversion  : "1.0"
     property var    dbhandler  : DB.openDatabase(dbversion)
     property bool   debug      : false
 
     // Settings
-    property bool coverShowAppName        : DB.getSetting( "coverShowAppName" , false )
-    property bool deleteDatabase          : DB.getSetting( "deleteDatabase"   , false )
+    property bool   coverShowAppName      : DB.getSetting( "coverShowAppName" , false )
+    property bool   deleteDatabase        : DB.getSetting( "deleteDatabase"   , false )
     property string csvSeparator          : DB.getSetting( "csvSeparator"     , ',' )
     property string csvDecimal            : DB.getSetting( "csvDecimal"       , '.' )
 

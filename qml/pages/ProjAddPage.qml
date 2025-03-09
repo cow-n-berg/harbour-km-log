@@ -31,8 +31,8 @@ Dialog {
         project     = txtProj.text
         invoiced    = checkInvc.checked
         isTarget    = checkTarg.checked
-        price       = checkInvc.checked ? txtPric.text : 0
-        kmTarget    = checkTarg.checked ? txtTarg.text : 0
+        price       = checkInvc.checked ? txtPric.text.replace(generic.csvDecimal, ".") : 0
+        kmTarget    = checkTarg.checked ? txtTarg.text.replace(generic.csvDecimal, ".") : 0
 //        projType    = typeBox.value
         bgColor     = colorIndicator.color
         console.log("New project: " + project )
@@ -112,7 +112,7 @@ Dialog {
             focus: true
             readOnly: addNewProj ? false : true
             width: parent.width
-            label: qsTr("Project") + (addNewProj ? qsTr(" (not editable)") : "")
+            label: qsTr("Project") + (addNewProj ? "" : qsTr(" (not editable)"))
             placeholderText: label
 //            placeholderColor: Theme.secondaryColor
 //            color: Theme.primaryColor

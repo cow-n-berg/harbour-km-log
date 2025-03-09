@@ -103,8 +103,7 @@ Page {
 
                         DelegateInfoItem {
                             id: kmItem
-                            text: kilometer
-                            description: qsTr("km")
+                            text: kilometer.toString().replace(".", generic.csvDecimal);                            description: qsTr("km")
                             alignment: Qt.AlignHCenter
                             anchors {
                                 left: colRect.right

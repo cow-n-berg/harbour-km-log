@@ -21,7 +21,7 @@ Dialog {
     property bool   isTarget
     property string projType
     property string bgColor
-    property int    kmTotal    : 0
+    property real   kmTotal    : 0.0
     property string strKmTotal
     property int    listLength
 
@@ -71,7 +71,7 @@ Dialog {
             kmTotal += trips[i].kilometer;
 //            console.log( JSON.stringify(trips[i]));
         }
-        strKmTotal = kmTotal.toString();
+        strKmTotal = kmTotal.toString().replace(".", generic.csvDecimal);
         console.log( "listModel trips updated");
     }
 
@@ -205,7 +205,7 @@ Dialog {
 
                         DelegateInfoItem {
                             id: kmItem
-                            text: kilometer
+                            text: kilometer.toString().replace(".", generic.csvDecimal);
                             description: qsTr("km")
                             alignment: Qt.AlignHCenter
                             anchors {

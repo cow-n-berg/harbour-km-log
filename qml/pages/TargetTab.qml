@@ -59,10 +59,11 @@ TabItem {
                 delegate: TwoLineDelegate {
                     text: project
                     description: qsTr("Target is ") + txtKmTarget + qsTr(" km")
+                    highlighted: detail === 0
 
                     leftItem: Item {
-                         width: Theme.itemSizeSmall
-                         height: width
+                         width: Theme.itemSizeExtraLarge
+                         height: Theme.itemSizeSmall
 
                          Rectangle {
                              id: colRect
@@ -74,11 +75,16 @@ TabItem {
                                  verticalCenter: parent.verticalCenter
                              }
                              color: bgColor
+                             visible: detail === 0
+                         }
+                         DelegateInfoItem {
+                             text: tripMonth
+                             visible: detail === 1
                          }
                     }
 
                     rightItem: DelegateInfoItem {
-                        text: txtKm
+                        text: txtKm.replace(".", generic.csvDecimal);
                         description: qsTr("km")
                         alignment: Qt.AlignRight
                     }

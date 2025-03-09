@@ -57,14 +57,15 @@ TabItem {
                 model: listInvoice
                 delegate: TwoLineDelegate {
                     text: project || qsTr("Monthly totals")
-                    description: qsTr("Total of ") + txtKm + qsTr(" km @ ") + txtPrice
+                    description: qsTr("Total of ") + txtKm + qsTr(" km @ ") + txtPrice.replace(".", generic.csvDecimal);
                     highlighted: detail === 0
 
                     leftItem: DelegateInfoItem {
                         text: tripMonth
                     }
+
                     rightItem: DelegateInfoItem {
-                        text: txtAmount
+                        text: txtAmount.replace(".", generic.csvDecimal);
                         description: qsTr("euro")
                         alignment: Qt.AlignRight
                     }
