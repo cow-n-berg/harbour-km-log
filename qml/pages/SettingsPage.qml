@@ -9,6 +9,7 @@ Dialog {
     property var callback
 
     onAccepted: {
+        generic.csvMille     = txtMil.text;
         generic.csvDecimal   = txtDec.text;
         generic.csvSeparator = txtSep.text;
 
@@ -16,6 +17,7 @@ Dialog {
         Database.setSetting( "deleteDatabase"  , generic.deleteDatabase   )
         Database.setSetting( "csvDecimal"      , generic.csvDecimal       )
         Database.setSetting( "csvSeparator"    , generic.csvSeparator     )
+        Database.setSetting( "csvMille"        , generic.csvMille         )
 
         dialog.callback(true)
     }
@@ -53,8 +55,20 @@ Dialog {
             }
 
             TextField {
-                id: txtDec
+                id: txtSep
                 focus: true
+                width: parent.width
+                text: generic.csvSeparator
+                label: qsTr("CSV separation character (, or ;)")
+                placeholderText: qsTr("One csv separation character only")
+                placeholderColor: Theme.secondaryColor
+                color: Theme.primaryColor
+                EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                EnterKey.onClicked: txtDec.focus = true
+            }
+
+            TextField {
+                id: txtDec
                 width: parent.width
                 text: generic.csvDecimal
                 label: qsTr("Decimal character (. or ,)")
@@ -62,15 +76,15 @@ Dialog {
                 placeholderColor: Theme.secondaryColor
                 color: Theme.primaryColor
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.onClicked: txtSep.focus = true
+                EnterKey.onClicked: txtMil.focus = true
             }
 
             TextField {
-                id: txtSep
+                id: txtMil
                 width: parent.width
-                text: generic.csvSeparator
-                label: qsTr("CSV separation character (, or ;)")
-                placeholderText: qsTr("One csv separation character only")
+                text: generic.csvMille
+                label: qsTr("Separation character per 10^3 (, or .)")
+                placeholderText: qsTr("One 10^3 separation character only")
                 placeholderColor: Theme.secondaryColor
                 color: Theme.primaryColor
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"

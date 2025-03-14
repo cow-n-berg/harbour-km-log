@@ -343,7 +343,7 @@ function showInvoices() {
     var db = databaseHandler || openDatabase();
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
-            SELECT detail, \
+            SELECT detail,
                    project, \
                    bgColor, \
                    tripMonth, \
@@ -354,9 +354,28 @@ function showInvoices() {
                    printf('%,.2f', price) AS txtPrice, \
                    printf('%,.2f', amount) AS txtAmount \
             FROM ( \
-                SELECT 0 AS detail, \
+                SELECT -1 AS detail, \
+                       '13' as ordr, \
                        '' AS project, \
                        p.bgColor, \
+                       SUBSTR(t.tripDate, 1, 4) AS tripYear, \
+                       SUBSTR(t.tripDate, 1, 4) AS tripMonth, \
+                       CASE WHEN SUM(IFNULL(t.kilometer, 0)) = 0 \
+                            THEN 0 \
+                            ELSE SUM(IFNULL(t.kilometer * p.price, 0)) / SUM(IFNULL(t.kilometer, 0)) \
+                            END AS price, \
+                       SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
+                       ROUND(SUM(IFNULL(t.kilometer * p.price, 0)), 2) AS amount \
+                  FROM km_trip t \
+                 INNER JOIN km_proj p ON p.project = t.project \
+                 WHERE p.invoiced \
+                 GROUP BY tripMonth \
+              UNION \
+                SELECT 0 AS detail, \
+                       SUBSTR(t.tripDate, 6, 2) as ordr, \
+                       '' AS project, \
+                       p.bgColor, \
+                       SUBSTR(t.tripDate, 1, 4) AS tripYear, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        CASE WHEN SUM(IFNULL(t.kilometer, 0)) = 0 \
                             THEN 0 \
@@ -370,8 +389,10 @@ function showInvoices() {
                  GROUP BY tripMonth \
               UNION \
                 SELECT 1 AS detail, \
+                       SUBSTR(t.tripDate, 6, 2) as ordr, \
                        t.project, \
                        p.bgColor, \
+                       SUBSTR(t.tripDate, 1, 4) AS tripYear, \
                        SUBSTR(t.tripDate, 1, 7) AS tripMonth, \
                        p.price, \
                        SUM(IFNULL(t.kilometer, 0)) AS kilometer, \
@@ -381,7 +402,7 @@ function showInvoices() {
                  WHERE p.invoiced \
                  GROUP BY tripMonth, t.project \
             ) \
-            ORDER BY tripMonth DESC, detail, project \
+            ORDER BY tripYear DESC, ordr DESC, detail, project \
             ;");
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));

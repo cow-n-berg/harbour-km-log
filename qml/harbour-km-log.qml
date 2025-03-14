@@ -9,7 +9,7 @@ ApplicationWindow
 {
     id: generic
 
-    property string version    : "0.4-3"
+    property string version    : "0.4-4"
     property string dbversion  : "1.0"
     property var    dbhandler  : DB.openDatabase(dbversion)
     property bool   debug      : false
@@ -19,6 +19,7 @@ ApplicationWindow
     property bool   deleteDatabase        : DB.getSetting( "deleteDatabase"   , false )
     property string csvSeparator          : DB.getSetting( "csvSeparator"     , ',' )
     property string csvDecimal            : DB.getSetting( "csvDecimal"       , '.' )
+    property string csvMille              : DB.getSetting( "csvMille"         , ',' )
 
     Component.onCompleted: { DB.openDatabase() }
 

@@ -32,6 +32,11 @@ AboutPageBase {
     changelogItems: [
         // add new entries at the top
         ChangelogItem {
+            version: "0.4-4"
+            date: "2025-03-14"
+            paragraphs: "Small changes."
+        },
+        ChangelogItem {
             version: "0.4-1"
             date: "2025-03-06"
             paragraphs: "Small changes."
@@ -39,7 +44,7 @@ AboutPageBase {
         ChangelogItem {
             version: "0.4-0"
             date: "2025-03-04"
-            paragraphs: "Published version."
+            paragraphs: "First published version."
         },
         ChangelogItem {
             version: "0.3-6"

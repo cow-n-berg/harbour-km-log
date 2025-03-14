@@ -194,7 +194,7 @@ Dialog {
                         Rectangle {
                             id: colRect
                             height: Theme.itemSizeMedium * 0.5
-                            width: Theme.itemSizeMedium * 0.15
+                            width: Theme.itemSizeMedium * 0.1
                             radius: width
                             anchors {
                                 left: parent.left

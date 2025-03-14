@@ -57,23 +57,26 @@ TabItem {
                 model: listInvoice
                 delegate: TwoLineDelegate {
                     text: project || qsTr("Monthly totals")
-                    description: qsTr("Total of ") + txtKm + qsTr(" km @ ") + txtPrice.replace(".", generic.csvDecimal);
+                    description: txtKm.replace(",", generic.csvMille) + qsTr(" km @ ") + txtPrice.replace(".", generic.csvDecimal);
                     highlighted: detail === 0
 
                     leftItem: DelegateInfoItem {
+                        width: Theme.itemSizeExtraLarge
                         text: tripMonth
+                        alignment: Qt.AlignLeft
                     }
 
                     rightItem: Item {
-                        width: Theme.itemSizeLarge
+                        width: Theme.itemSizeExtraLarge
 
                         Rectangle {
                             id: colRect
                             height: Theme.itemSizeMedium * 0.5
-                            width: Theme.itemSizeMedium * 0.15
+                            width: Theme.itemSizeMedium * 0.1
                             radius: width
                             anchors {
-                                right: infoItem.left
+                                right: parent.right
+//                                left: parent.left
                                 verticalCenter: parent.verticalCenter
                             }
                             color: bgColor
@@ -87,7 +90,8 @@ TabItem {
                             description: qsTr("euro")
                             alignment: Qt.AlignRight
                             anchors {
-                                right: parent.right
+//                                right: parent.right
+                                left: parent.left
                                 verticalCenter: colRect.verticalCenter
                             }
                         }
