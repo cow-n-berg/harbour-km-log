@@ -1,5 +1,6 @@
 **/*.afdesign
 /qml/modules/**
 /libs/**
-
+libs/opal-translations
+libs/opal-docs
 

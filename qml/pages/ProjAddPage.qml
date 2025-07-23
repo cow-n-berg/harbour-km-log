@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
@@ -20,6 +20,7 @@ Dialog {
     property bool   isTarget
     property string projType
     property string bgColor
+    property bool   isComplete
 
     property var    boxList : ["bike", "car", "run", "walk" ]
     property int    boxIndex
@@ -29,6 +30,7 @@ Dialog {
     onAccepted: {
         console.log("Accepted Dialog")
         project     = txtProj.text
+        isComplete  = checkCmpl.checked
         invoiced    = checkInvc.checked
         isTarget    = checkTarg.checked
         price       = checkInvc.checked ? txtPric.text.replace(generic.csvDecimal, ".") : 0
@@ -36,8 +38,8 @@ Dialog {
 //        projType    = typeBox.value
         bgColor     = colorIndicator.color
         console.log("New project: " + project )
-        // addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
-        Database.addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
+        // addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor, isComplete)
+        Database.addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor, isComplete)
         dialog.callback(true, project)
     }
 
@@ -59,6 +61,7 @@ Dialog {
             var tmp = new Date()
             addNewProj   = true
             txtProj.text      = ""
+            checkCmpl.checked = false
             checkInvc.checked = false
             checkTarg.checked = false
             txtPric.text      = ""
@@ -71,6 +74,7 @@ Dialog {
             console.log("This project: " + JSON.stringify(proj))
             addNewProj   = false
             txtProj.text      = proj.project
+            checkCmpl.checked = proj.isComplete
             checkInvc.checked = proj.invoiced
             checkTarg.checked = proj.isTarget
             txtPric.text      = proj.price || ""
@@ -172,7 +176,20 @@ Dialog {
         }
 
         SectionHeader {
-            text: "Option: priced per km?"
+            text: qsTr("Project already completed?")
+            font.pixelSize: Theme.fontSizeExtraSmall
+            visible: !addNewProj
+        }
+
+        TextSwitch {
+            id: checkCmpl
+            text: (checked ? qsTr("This project is completed") : qsTr("This project is still continuing") )
+            description: "Project completed or continuing?"
+            visible: !addNewProj
+        }
+
+        SectionHeader {
+            text: qsTr("Option: priced per km?")
             font.pixelSize: Theme.fontSizeExtraSmall
         }
 
@@ -200,7 +217,7 @@ Dialog {
         }
 
         SectionHeader {
-            text: "Option: a target to work towards?"
+            text: qsTr("Option: a target to work towards?")
             font.pixelSize: Theme.fontSizeExtraSmall
         }
 
@@ -226,7 +243,6 @@ Dialog {
             EnterKey.enabled: text.length > 0
             EnterKey.onClicked: dialog.accept()
         }
-
     }
 }
 

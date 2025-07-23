@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
@@ -13,7 +13,6 @@ Dialog {
     property var callback
     property var template
 
-    property bool   addNewProj : true
     property string project
     property bool   invoiced
     property string price
@@ -21,10 +20,12 @@ Dialog {
     property bool   isTarget
     property string projType
     property string bgColor
+    property bool   isComplete
     property real   kmTotal    : 0.0
     property string strKmTotal
     property int    listLength
 
+    property bool hideCompleted : generic.hideCompleted
     property bool somethingHasChanged : false
 
     onAccepted: {
@@ -48,12 +49,13 @@ Dialog {
 
     function getThisProj(projId) {
         // Available in a Project
-        // project, invoiced, price, kmTarget, isTarget, projType, bgColor, txtPrice, txtKmTarget
+        // project, invoiced, price, kmTarget, isTarget, projType, bgColor, txtPrice, txtKmTarget, isComplete
 
         var proj = Database.getOneProj(projId)
         console.log("This project: " + JSON.stringify(proj))
         project      = proj.project;
         txtProj.text = proj.project;
+        isComplete   = proj.isComplete;
         invoiced     = proj.invoiced;
         isTarget     = proj.isTarget;
         txtPric.text = proj.price.toString().replace(".", generic.csvDecimal);
@@ -64,7 +66,7 @@ Dialog {
         // Show the trips from the project too
         listModel.clear();
         kmTotal = 0;
-        var trips = Database.getTrips(projId);
+        var trips = Database.getTrips(false, projId);
         listLength = trips.length;
         for (var i = 0; i < listLength; ++i) {
             listModel.append(trips[i]);
@@ -148,6 +150,14 @@ Dialog {
                 readOnly: true
                 color: Theme.primaryColor
                 visible: isTarget
+            }
+
+            TextField {
+                id: txtCmpl
+                width: parent.width
+                label: qsTr("Status") + ": " + (isComplete ? qsTr("Completed") : qsTr("Continuing"))
+                readOnly: true
+                color: Theme.primaryColor
             }
 
             Separator {

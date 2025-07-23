@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import "../modules/Opal/About"
 
 AboutPageBase {
@@ -31,6 +31,16 @@ AboutPageBase {
 
     changelogItems: [
         // add new entries at the top
+        ChangelogItem {
+            version: "0.5-2"
+            date: "2025-07-23"
+            paragraphs: "Swedish translation by eson57."
+        },
+        ChangelogItem {
+            version: "0.5-0"
+            date: "2025-04-06"
+            paragraphs: "Option to show or hide completed projects."
+        },
         ChangelogItem {
             version: "0.4-4"
             date: "2025-03-14"

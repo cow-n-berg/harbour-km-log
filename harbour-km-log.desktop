@@ -18,7 +18,6 @@ OrganizationName=nl.cow-n-berg
 ApplicationName=harbour-km-log
 # Add the required permissions here
 Permissions=UserDirs
-# Permissions=UserDirs;Notifications
 
 [X-HarbourBackup]
 # BackupPathList=.local/share/harbour-km-log/

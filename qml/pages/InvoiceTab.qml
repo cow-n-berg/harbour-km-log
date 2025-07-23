@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../modules/Opal/Delegates"
 import "../modules/Opal/Tabs"
@@ -8,7 +8,19 @@ import "../scripts/TextFunctions.js" as TF
 TabItem {
     id: invoiceTab
 
-    property int listLength
+    property bool hideCompleted : generic.hideCompleted
+    property int  listLength
+
+    function header(detail, project) {
+        var hdr = "";
+        if (detail === -1)
+            hdr = qsTr("Yearly totals");
+        else if (detail === 0)
+            hdr = qsTr("Monthly totals");
+        else
+            hdr = project;
+        return hdr;
+    }
 
     ListModel {
         id: listInvoice
@@ -19,7 +31,7 @@ TabItem {
         function update()
         {
             listInvoice.clear();
-            var totals = Database.showInvoices();
+            var totals = Database.showInvoices(hideCompleted);
             listLength = totals.length;
             for (var i = 0; i < listLength; ++i) {
                 listInvoice.append(totals[i]);
@@ -56,7 +68,7 @@ TabItem {
             DelegateColumn {
                 model: listInvoice
                 delegate: TwoLineDelegate {
-                    text: project || qsTr("Monthly totals")
+                    text: header(detail, project)
                     description: txtKm.replace(",", generic.csvMille) + qsTr(" km @ ") + txtPrice.replace(".", generic.csvDecimal);
                     highlighted: detail === 0
 

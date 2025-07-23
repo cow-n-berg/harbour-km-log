@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
@@ -7,6 +7,7 @@ import "../scripts/TextFunctions.js" as TF
 Page {
     id: projectsPage
 
+    property bool hideCompleted : generic.hideCompleted
     property int listLength
 
     anchors {
@@ -22,8 +23,33 @@ Page {
         }
     }
 
+    function descr(invoiced, txtPrice, txtKmTarget, isTarget, projType, isComplete) {
+        var txt = '';
+
+        txt += projType + ' | ';
+
+        if (invoiced)
+            txt += qsTr("Invoiced @ ") + txtPrice.replace(".", generic.csvDecimal);
+        else
+            txt += qsTr("Priceless");
+        txt += ' | ';
+
+        if (isTarget)
+            txt += qsTr("Target: ") + txtKmTarget.replace(".", generic.csvDecimal);
+        else
+            txt += qsTr("No Target");
+        txt += ' | ';
+
+//        if (isComplete)
+//            txt += qsTr("Completed");
+//        else
+//            txt += qsTr("Continuing");
+
+        return txt
+    }
+
     // Available Projects
-    // project, invoiced, price, kmTarget, isTarget, projType, bgColor
+    // project, invoiced, price, kmTarget, isTarget, projType, bgColor, isComplete
 
     ListModel {
         id: listModel
@@ -31,7 +57,7 @@ Page {
         function update()
         {
             listModel.clear();
-            var projects = Database.getProjects();
+            var projects = Database.getProjects(hideCompleted);
             listLength = projects.length;
             for (var i = 0; i < listLength; ++i) {
                 listModel.append(projects[i]);
@@ -75,10 +101,11 @@ Page {
             DelegateColumn {
                 model: listModel
 
-                delegate: TwoLineDelegate {
+                delegate: ThreeLineDelegate {
                     id: projDelegat
+                    title: qsTr("Status") + ": " + (isComplete ? qsTr("Completed") : qsTr("Continuing"))
                     text: project
-                    description: projType + ' | ' + (invoiced ? qsTr("Invoiced @ ") + txtPrice.replace(".", generic.csvDecimal) : qsTr("Priceless")) + ' | ' + (isTarget ? qsTr("Target: ") + txtKmTarget.replace(".", generic.csvDecimal) : qsTr("No Target"))
+                    description: descr(invoiced, txtPrice, txtKmTarget, isTarget, projType, isComplete)
 
                     property string recId : project
 
@@ -113,6 +140,11 @@ Page {
                         console.log("Clicked proj " + index)
                         pageStack.push(Qt.resolvedUrl("ProjShowPage.qml"),
                               {"recId": recId, callback: updateAfterDialog})
+                    }
+
+                    Separator {
+                        width: parent.width
+                        color: Theme.secondaryColor
                     }
                 }
             }

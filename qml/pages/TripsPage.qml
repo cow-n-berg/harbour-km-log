@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../modules/Opal/Delegates"
 import "../scripts/Database.js" as Database
@@ -7,6 +7,7 @@ import "../scripts/TextFunctions.js" as TF
 Page {
     id: tripsPage
 
+    property bool hideCompleted : generic.hideCompleted
     property int listLength
 
     anchors {
@@ -31,7 +32,7 @@ Page {
         function update()
         {
             listModel.clear();
-            var trips = Database.getTrips();
+            var trips = Database.getTrips(hideCompleted, null);
             listLength = trips.length;
             for (var i = 0; i < listLength; ++i) {
                 listModel.append(trips[i]);

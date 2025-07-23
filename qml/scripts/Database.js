@@ -50,7 +50,8 @@ function openDatabase( dbversion ) {
             upgradeDatabase(dbversion);
         } catch (err) {
             console.log("initDatabase error: " + err);
-        };    }
+        };
+    }
     return databaseHandler;
 }
 
@@ -77,8 +78,17 @@ function cleanTablesRecs() {
 
 function initializeDatabase( dbH ) {
     var db = dbH || openDatabase();
+    var currVersion;
+
     console.log("initializeDatabase started");
+    if (typeof db.version !== "string" )
+        db.version = "0.0";
+
+    currVersion = db.version;
+
     db.transaction(function(tx) {
+        tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", currVersion]);
+
         /*
          * Set up settings.
          */
@@ -121,9 +131,10 @@ function initializeDatabase( dbH ) {
                 invoiced INTEGER NOT NULL DEFAULT 1, \
                 price NUMERIC NOT NULL DEFAULT 0.25, \
                 kmTarget NUMERIC NOT NULL DEFAULT 300, \
-                isTarget INTEGER NOT NULL DEFAULT 1, \
+                isTarget INTEGER NOT NULL DEFAULT 0, \
                 projType TEXT NOT NULL DEFAULT 'car', \
-                bgColor TEXT NOT NULL DEFAULT '#777777' \
+                bgColor TEXT NOT NULL DEFAULT '#777777', \
+                isComplete INTEGER NOT NULL DEFAULT 0 \
             );");
         tx.executeSql("\
             CREATE INDEX IF NOT EXISTS proj ON km_proj ( \
@@ -131,12 +142,23 @@ function initializeDatabase( dbH ) {
                 project \
             );");
         tx.executeSql("\
-            CREATE INDEX IF NOT EXISTS proj ON km_proj ( \
+            CREATE INDEX IF NOT EXISTS projTp ON km_proj ( \
                 projType, \
                 project \
             );");
-
     });
+
+    try {
+        db.transaction(function(tx) {
+            tx.executeSql("\
+                CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
+                    isComplete, \
+                    project \
+                );");
+        });
+    } catch (err) {
+        console.log("create index projCompl error: " + err);
+    };
 
     /*
      * Set up view.
@@ -161,29 +183,80 @@ function initializeDatabase( dbH ) {
 }
 
 /*
+ * Handles updates of old databases.
+ */
+function upgradeDatabase( dbversion )
+{
+    console.log("upgradeDatabase ");
+    var db = databaseHandler || openDatabase();
+    var newVersion;
+    var rs;
+
+    console.log("Current version: " + db.version + ", New version: " + dbversion);
+
+    if (db.version < dbversion )
+    {
+        db.changeVersion(db.version, dbversion, function (tx) {
+            newVersion = "1.1";
+            if (db.version < newVersion ) {
+                /*
+                 * Enables archiving a project.
+                 */
+                rs = tx.executeSql("ALTER TABLE km_proj ADD COLUMN isComplete INTEGER NOT NULL DEFAULT 0");
+                console.log(rs);
+                rs = tx.executeSql("\
+                        CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
+                            isComplete, \
+                            project \
+                        );");
+                console.log(rs);
+                rs = tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", newVersion]);
+                console.log("Tables altered 1.1");
+                db.version = "1.1";
+            }
+            /*
+             * Upgrade complete.
+             */
+        });
+    }
+}
+
+/*
  * All records.
  */
-function getTrips(filterProject) {
+function getTrips(hideCompleted, filterProject) {
     var trips = [];
     console.log("getTrips ");
-    var db = databaseHandler || openDatabase();
-    var query = "\
+    var db     = databaseHandler || openDatabase();
+    var filter = "";
+    var query  = "";
+
+    if (typeof filterProject == "string")
+        filter += "WHERE t.project = '" + filterProject + "' ";
+
+    if (typeof hideCompleted !== "boolean") hideCompleted = false;
+    console.log(hideCompleted);
+    if (hideCompleted)
+        filter += (filter.length == 0 ? "WHERE" : "AND") + " ifnull(p.isComplete, 0) = 0";
+
+    query= "\
             SELECT t.tripId, \
                    t.tripDate, \
                    t.descriptn, \
                    t.kilometer, \
                    t.project, \
+                   ifnull(p.isComplete, 0) AS isComplete, \
                    ifnull(p.price, 0) AS price, \
                    ifnull(p.isTarget, 0) AS isTarget, \
                    ifnull(p.bgColor, '#777777') AS bgColor \
               FROM km_trip t \
               LEFT OUTER JOIN km_proj p ON p.project = t.project ";
 
-    if (typeof filterProject == "string")
-        query += "WHERE t.project = '" + filterProject + "' ";
+    if (filter.length > 0)
+        query += filter + " ";
 
     query += "ORDER BY t.tripDate DESC, t.tripId DESC;";
-//    console.log(query);
+    console.log(query);
 
     db.transaction(function(tx) {
         var rs = tx.executeSql(query);
@@ -195,12 +268,19 @@ function getTrips(filterProject) {
     return trips;
 }
 
-function getProjects() {
-    var projs = [];
+function getProjects(hideCompleted) {
     console.log("getProjects ");
-    var db = databaseHandler || openDatabase();
-    db.transaction(function(tx) {
-        var rs = tx.executeSql("\
+    var projs = [];
+    var db     = databaseHandler || openDatabase();
+    var filter = "";
+    var query  = "";
+
+    if (typeof hideCompleted !== "boolean") hideCompleted = false;
+    console.log(hideCompleted);
+    if (hideCompleted)
+        filter += "WHERE NOT isComplete";
+
+    query = "\
             SELECT project, \
                    invoiced, \
                    price, \
@@ -208,11 +288,20 @@ function getProjects() {
                    isTarget, \
                    projType, \
                    bgColor, \
+                   isComplete, \
                    printf('%,.2f', price) AS txtPrice, \
                    printf('%,.0f', kmTarget) AS txtKmTarget \
               FROM km_proj \
-             ORDER BY project \
-            ;");
+            ";
+
+    if (filter.length > 0)
+        query += filter + " ";
+
+    query += "ORDER BY project;";
+    console.log(query);
+
+    db.transaction(function(tx) {
+        var rs = tx.executeSql(query);
         for (var i = 0; i < rs.rows.length; ++i) {
             projs.push(rs.rows.item(i));
         }
@@ -242,7 +331,7 @@ function addTrip(tripId, tripDate, descriptn, kilometer, project)
     return 1;
 }
 
-function addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor)
+function addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projType, bgColor, isComplete)
 {
     console.log("addProj");
     var db = databaseHandler || openDatabase();
@@ -251,22 +340,25 @@ function addProj(addNewProj, project, invoiced, price, kmTarget, isTarget, projT
     var pric = parseFloat(price);
     var targ = parseFloat(kmTarget);
 
-    console.log(JSON.stringify([project, invoiced, pric, targ, isTarget, bgColor]))
+    console.log(JSON.stringify([project, invoiced, pric, targ, isTarget, bgColor,isComplete]))
     db.transaction(function(tx) {
         rs = tx.executeSql('\
                 INSERT OR REPLACE INTO km_proj \
-                (project, invoiced, price, kmTarget, isTarget, projType, bgColor) \
-                VALUES (?,?,?,?,?,?,?);', [project, invoiced, pric, targ, isTarget, projType, bgColor]);
+                (project, invoiced, price, kmTarget, isTarget, projType, bgColor, isComplete) \
+                VALUES (?,?,?,?,?,?,?,?);', [project, invoiced, pric, targ, isTarget, projType, bgColor, isComplete]);
         var id = rs.insertId;
         console.log("Project inserted, id=" + id);
     } );
     return 1;
 }
 
-function showTotals() {
-    var totals = [];
+function showTotals(hideCompleted) {
     console.log("showTargets");
-    var db = databaseHandler || openDatabase();
+    var totals = [];
+    var db     = databaseHandler || openDatabase();
+    if (typeof hideCompleted !== "boolean") hideCompleted = false;
+    console.log(hideCompleted);
+
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
             SELECT detail, \
@@ -294,6 +386,7 @@ function showTotals() {
                   FROM km_proj p \
                  INNER JOIN km_trip t ON p.project = t.project \
                  WHERE p.isTarget = 1 \
+                   AND CASE WHEN ? THEN NOT p.isComplete ELSE 1 END \
                  GROUP BY p.project \
               UNION \
                 SELECT 1 AS detail, \
@@ -312,10 +405,11 @@ function showTotals() {
                   FROM km_proj p \
                  INNER JOIN km_trip t ON p.project = t.project \
                  WHERE p.isTarget = 1 \
+                   AND CASE WHEN ? THEN NOT p.isComplete ELSE 1 END \
                  GROUP BY p.project, tripMonth \
             ) \
             ORDER BY project, detail, tripMonth DESC \
-            ;");
+            ;", [hideCompleted, hideCompleted]);
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));
         }
@@ -337,10 +431,13 @@ function showTotals() {
 // GROUP BY p.project \
 // ORDER BY p.project \
 
-function showInvoices() {
-    var totals = [];
+function showInvoices(hideCompleted) {
     console.log("showInvoices");
-    var db = databaseHandler || openDatabase();
+    var totals = [];
+    var db     = databaseHandler || openDatabase();
+    if (typeof hideCompleted !== "boolean") hideCompleted = false;
+    console.log(hideCompleted);
+
     db.transaction(function(tx) {
         var rs = tx.executeSql("\
             SELECT detail,
@@ -369,6 +466,7 @@ function showInvoices() {
                   FROM km_trip t \
                  INNER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
+                   AND CASE WHEN ? THEN NOT p.isComplete ELSE 1 END \
                  GROUP BY tripMonth \
               UNION \
                 SELECT 0 AS detail, \
@@ -386,6 +484,7 @@ function showInvoices() {
                   FROM km_trip t \
                  INNER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
+                   AND CASE WHEN ? THEN NOT p.isComplete ELSE 1 END \
                  GROUP BY tripMonth \
               UNION \
                 SELECT 1 AS detail, \
@@ -400,10 +499,11 @@ function showInvoices() {
                   FROM km_trip t \
                  INNER JOIN km_proj p ON p.project = t.project \
                  WHERE p.invoiced \
+                   AND CASE WHEN ? THEN NOT p.isComplete ELSE 1 END \
                  GROUP BY tripMonth, t.project \
             ) \
             ORDER BY tripYear DESC, ordr DESC, detail, project \
-            ;");
+            ;", [hideCompleted, hideCompleted, hideCompleted]);
         for (var i = 0; i < rs.rows.length; ++i) {
             totals.push(rs.rows.item(i));
         }
@@ -417,8 +517,8 @@ function showInvoices() {
 function showCsvTrips(separat, decimal) {
     // separat = ';';
     // decimal = ',';
-    var keys  = ["tripDate", "descriptn", "kilometer", "project", "invoiced", "price", "amount", "isTarget", "kmTarget", "projType"]
-    var head  = ["trip date", "description", "kilometer", "project", "invoiced", "price", "amount", "target", "target km", "project type"];
+    var keys  = ["tripDate", "descriptn", "kilometer", "project", "invoiced", "price", "amount", "isTarget", "kmTarget", "projType", "isComplete"]
+    var head  = ["trip date", "description", "kilometer", "project", "invoiced", "price", "amount", "target", "target km", "project type", "completed"];
     var trips = [];
     var rs, list, len, csv, vals;
     var k, i, j, s;
@@ -435,10 +535,12 @@ function showCsvTrips(separat, decimal) {
                    ifnull(p.price, 0) * kilometer AS amount, \
                    ifnull(p.isTarget, 0) AS isTarget, \
                    ifnull(p.kmTarget, 0) AS kmTarget, \
-                   ifnull(p.projType, 0) AS projType \
+                   ifnull(p.projType, 0) AS projType, \
+                   ifnull(p.isComplete, 0) AS isComplete \
               FROM km_trip t \
               LEFT OUTER JOIN km_proj p ON p.project = t.project \
-             ORDER BY t.tripDate DESC, t.tripId DESC;";
+             ORDER BY t.tripDate DESC, t.tripId DESC \
+             ;";
 
     db.transaction(function(tx) {
         rs = tx.executeSql(query);
@@ -532,6 +634,7 @@ function getOneTrip(tripId) {
                    t.descriptn, \
                    t.kilometer, \
                    t.project, \
+                   ifnull(p.isComplete, 0) AS isComplete, \
                    ifnull(p.price, 0) AS price, \
                    ifnull(p.isTarget, 0) AS isTarget, \
                    ifnull(p.bgColor, '#777777') AS bgColor \
@@ -567,54 +670,25 @@ function getOneProj(project) {
                    kmTarget, \
                    isTarget, \
                    projType, \
+                   isComplete, \
                    bgColor \
               FROM km_proj   \
              WHERE project = ? \
             ;", [project]);
 
-        projt = { project  : rs.rows.item(0).project,
-                  invoiced : rs.rows.item(0).invoiced,
-                  price    : rs.rows.item(0).price,
-                  kmTarget : rs.rows.item(0).kmTarget,
-                  isTarget : rs.rows.item(0).isTarget,
-                  projType : rs.rows.item(0).projType,
-                  bgColor  : rs.rows.item(0).bgColor
+        projt = { project    : rs.rows.item(0).project,
+                  invoiced   : rs.rows.item(0).invoiced,
+                  price      : rs.rows.item(0).price,
+                  kmTarget   : rs.rows.item(0).kmTarget,
+                  isTarget   : rs.rows.item(0).isTarget,
+                  projType   : rs.rows.item(0).projType,
+                  bgColor    : rs.rows.item(0).bgColor,
+                  isComplete : rs.rows.item(0).isComplete
                 };
         console.log(JSON.stringify(projt));
     });
 
     return projt;
-}
-
-/*
- * Handles updates of old databases.
- */
-function upgradeDatabase( dbversion )
-{
- /*
-    console.log("upgradeDatabase ");
-    var db = databaseHandler || openDatabase();
-    var rs;
-
-    console.log("Current version: " + db.version + ", New version: " + dbversion);
-    if (db.version < dbversion )
-    {
-        db.changeVersion(db.version, dbversion, function (tx) {
-            if (db.version < "1.0") {
-                /#
-                 # Enables remarks with geo_letters, and a (formula) rawtext with geo_waypts.
-                 #/
-                rs = tx.executeSql("ALTER TABLE geo_waypts ADD COLUMN rawtext TEXT DEFAULT ''");
-                console.log(rs);
-                console.log("Tables altered 1.0");
-                db.version = "1.0";
-            }
-            /#
-             # Upgrade complete.
-             #/
-        });
-    }
- */
 }
 
 function deleteTrip(tripId)
@@ -647,14 +721,17 @@ function getSetting(setting, default_value)
 {
     var db = openDatabase();
     var res="";
-    try {
+    try
+    {
         db.transaction(function(tx) {
-        var rs = tx.executeSql("SELECT value FROM settings WHERE setting=?;", [setting]);
-        if (rs.rows.length > 0) {
-            res = rs.rows.item(0).value;
-        } else {
-            res = default_value;
-        }
+            var rs = tx.executeSql("SELECT value FROM settings WHERE setting=?;", [setting]);
+            if (rs.rows.length > 0) {
+                res = rs.rows.item(0).value;
+            }
+            else {
+                res = default_value;
+                setSetting(setting, default_value);
+            }
         })
     } catch (err) {
         console.log("Database " + err);

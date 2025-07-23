@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
@@ -48,7 +48,7 @@ Dialog {
 
         // First set up the listModel
         listModel.clear();
-        boxList = [];
+        boxList = [""];
 
         // Available Projects
         // project, invoiced, price, kmTarget, isTarget, projType, bgColor
@@ -97,7 +97,7 @@ Dialog {
         }
 
         // set the ComboBox right
-        boxIndex = 0;
+        boxIndex = null;
         for (i = 0; i < boxList.length; i++) {
             if (boxList[i] === proj) {
                 boxIndex = i;

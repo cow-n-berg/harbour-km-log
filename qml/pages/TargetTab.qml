@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../modules/Opal/Delegates"
 import "../modules/Opal/Tabs"
@@ -8,7 +8,8 @@ import "../scripts/TextFunctions.js" as TF
 TabItem {
     id: targetTab
 
-    property int listLength
+    property bool hideCompleted : generic.hideCompleted
+    property int  listLength
 
     ListModel {
         id: listTotal
@@ -19,7 +20,7 @@ TabItem {
         function update()
         {
             listTotal.clear();
-            var totals = Database.showTotals();
+            var totals = Database.showTotals(hideCompleted);
             listLength = totals.length;
             for (var i = 0; i < listLength; ++i) {
 //            for (var i = 0; i < totals.length; ++i) {

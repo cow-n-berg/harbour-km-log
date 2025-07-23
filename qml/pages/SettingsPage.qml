@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../scripts/Database.js" as Database
 import "../scripts/TextFunctions.js" as TF
@@ -14,6 +14,7 @@ Dialog {
         generic.csvSeparator = txtSep.text;
 
         Database.setSetting( "coverShowAppName", generic.coverShowAppName )
+        Database.setSetting( "hideCompleted"   , generic.hideCompleted    )
         Database.setSetting( "deleteDatabase"  , generic.deleteDatabase   )
         Database.setSetting( "csvDecimal"      , generic.csvDecimal       )
         Database.setSetting( "csvSeparator"    , generic.csvSeparator     )
@@ -103,6 +104,15 @@ Dialog {
                 icon.source: "image://theme/icon-m-about"
                 checked: generic.coverShowAppName
                 onClicked: generic.coverShowAppName = !generic.coverShowAppName
+            }
+
+            IconTextSwitch {
+                id: hideCompl
+                text: qsTr("Hide completed projects")
+                description: qsTr("Show or hide projects and trips in lists and reports")
+                icon.source: "image://theme/icon-m-accept"
+                checked: generic.hideCompleted
+                onClicked: generic.hideCompleted = !generic.hideCompleted
             }
 
             SectionHeader {
