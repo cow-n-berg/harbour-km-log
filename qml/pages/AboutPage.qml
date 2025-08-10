@@ -32,6 +32,11 @@ AboutPageBase {
     changelogItems: [
         // add new entries at the top
         ChangelogItem {
+            version: "0.6-0"
+            date: "2025-08-05"
+            paragraphs: "Changed TabView to WrapEnd, following flypig's blog."
+        },
+        ChangelogItem {
             version: "0.5-2"
             date: "2025-07-23"
             paragraphs: "Swedish translation by eson57."

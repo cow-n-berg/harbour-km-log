@@ -3,15 +3,25 @@ import Sailfish.Silica 1.0
 import "../modules/Opal/Tabs"
 
 Page {
-    id: root
+    id: tabRoot
 
     allowedOrientations: Orientation.Portrait
 
     TabView {
         id: tabs
         anchors.fill: parent
-        currentIndex: 1
+        currentIndex: 0
         tabBarPosition: Qt.AlignTop
+        wrapMode: PagedView.WrapEnd
+
+        Tab {
+            id: invcTab
+            title: qsTr("Invoices")
+
+            Component {
+                InvoiceTab { }
+            }
+        }
 
         Tab {
             id: targTab
@@ -20,15 +30,6 @@ Page {
 
             Component {
                 TargetTab { }
-            }
-        }
-
-        Tab {
-            id: invcTab
-            title: qsTr("Invoices")
-
-            Component {
-                InvoiceTab { }
             }
         }
 
