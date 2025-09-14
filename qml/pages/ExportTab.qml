@@ -9,6 +9,7 @@ import "../scripts/TextFunctions.js" as TF
 TabItem {
     id: exportTab
 
+    property string filePath     : StandardPaths.download
     property string csvSeparator : generic.csvSeparator
     property string csvDecimal   : generic.csvDecimal
     property string copyMessage  : ""
@@ -98,7 +99,8 @@ TabItem {
                     onClicked: {
                         var dt = new Date()
                         var str = dt.toISOString()
-                        var csvPath = "/home/defaultuser/Downloads/km-log-" + str + ".csv"
+                        var csvPath = filePath + "/km-log-" + str + ".csv"
+                        console.log( csvPath )
                         writeToFile(csvPath, csv)
                         copyMessage = qsTr("csv text saved to Downloads")
                         iconSave.icon.color = Theme.highlightColor
