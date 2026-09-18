@@ -40,14 +40,16 @@ function openDatabase( dbversion ) {
             databaseHandler = DB.LocalStorage.openDatabaseSync(
                                 "km_log-db", "",
                                 "km database", 1000000);
-            cleanTablesRecs();
-            if (deleteDatabase) {
-                deleteDatabase = false
-                setSetting( "deleteDatabase", deleteDatabase )
-            }
 
+            console.log("starting initializeDatabase");
             initializeDatabase( databaseHandler );
+
+            console.log("starting upgradeDatabase");
             upgradeDatabase(dbversion);
+
+            console.log("starting cleanTablesRecs");
+            cleanTablesRecs();
+
         } catch (err) {
             console.log("initDatabase error: " + err);
         };
@@ -55,129 +57,113 @@ function openDatabase( dbversion ) {
     return databaseHandler;
 }
 
-function cleanTablesRecs() {
-
-    deleteDatabase = getSetting( "deleteDatabase" );
-
-    console.log("cleanTablesRecs ");
-    var db = databaseHandler || openDatabase();
-
-    db.transaction(function(tx) {
-        if (deleteDatabase) {
-            tx.executeSql("\
-                DROP TABLE IF EXISTS \
-                    km_trip \
-                ;");
-            tx.executeSql("\
-                DROP TABLE IF EXISTS \
-                    km_proj \
-                ;");
-        }
-    });
-}
-
 function initializeDatabase( dbH ) {
     var db = dbH || openDatabase();
-    var currVersion;
+    var currVersion = db.version;
 
     console.log("initializeDatabase started");
-    if (typeof db.version !== "string" )
-        db.version = "0.0";
 
-    currVersion = db.version;
 
-    db.transaction(function(tx) {
-        tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", currVersion]);
-
-        /*
-         * Set up settings.
-         */
-        tx.executeSql("\
-            CREATE TABLE IF NOT EXISTS settings ( \
-                setting TEXT PRIMARY KEY, \
-                value INTEGER NOT NULL \
-            );");
-
-        /*
-         * Set up trips.
-         */
-
-        console.log("Set up trips");
-        tx.executeSql("\
-            CREATE TABLE IF NOT EXISTS km_trip ( \
-                tripId TEXT PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP, \
-                tripDate TEXT NOT NULL, \
-                descriptn TEXT NOT NULL DEFAULT '', \
-                kilometer NUMERIC NOT NULL DEFAULT 0, \
-                project TEXT NOT NULL DEFAULT '' \
-            );");
-        tx.executeSql("\
-            CREATE INDEX IF NOT EXISTS active ON km_trip ( \
-                tripDate \
-            );");
-        tx.executeSql("\
-            CREATE INDEX IF NOT EXISTS recent ON km_trip ( \
-                project, \
-                tripDate \
-            );");
-
-        /*
-         * Set up projects.
-         */
-        console.log("Set up projects");
-        tx.executeSql("\
-            CREATE TABLE IF NOT EXISTS km_proj ( \
-                project TEXT PRIMARY KEY NOT NULL, \
-                invoiced INTEGER NOT NULL DEFAULT 1, \
-                price NUMERIC NOT NULL DEFAULT 0.25, \
-                kmTarget NUMERIC NOT NULL DEFAULT 300, \
-                isTarget INTEGER NOT NULL DEFAULT 0, \
-                projType TEXT NOT NULL DEFAULT 'car', \
-                bgColor TEXT NOT NULL DEFAULT '#777777', \
-                isComplete INTEGER NOT NULL DEFAULT 0 \
-            );");
-        tx.executeSql("\
-            CREATE INDEX IF NOT EXISTS proj ON km_proj ( \
-                invoiced, \
-                project \
-            );");
-        tx.executeSql("\
-            CREATE INDEX IF NOT EXISTS projTp ON km_proj ( \
-                projType, \
-                project \
-            );");
-    });
-
-    try {
-        db.transaction(function(tx) {
+    if (currVersion === "") {
+        db.changeVersion("", "1.1", (function(tx) {
+            /*
+             * Set up settings.
+             */
             tx.executeSql("\
-                CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
-                    isComplete, \
+                CREATE TABLE IF NOT EXISTS settings ( \
+                    setting TEXT PRIMARY KEY, \
+                    value INTEGER NOT NULL \
+                );");
+
+            tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", currVersion]);
+
+            /*
+             * Set up trips.
+             */
+
+            console.log("Set up trips");
+            tx.executeSql("\
+                CREATE TABLE IF NOT EXISTS km_trip ( \
+                    tripId TEXT PRIMARY KEY NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+                    tripDate TEXT NOT NULL, \
+                    descriptn TEXT NOT NULL DEFAULT '', \
+                    kilometer NUMERIC NOT NULL DEFAULT 0, \
+                    project TEXT NOT NULL DEFAULT '' \
+                );");
+            tx.executeSql("\
+                CREATE INDEX IF NOT EXISTS active ON km_trip ( \
+                    tripDate \
+                );");
+            tx.executeSql("\
+                CREATE INDEX IF NOT EXISTS recent ON km_trip ( \
+                    project, \
+                    tripDate \
+                );");
+
+            /*
+             * Set up projects.
+             */
+            console.log("Set up projects");
+            tx.executeSql("\
+                CREATE TABLE IF NOT EXISTS km_proj ( \
+                    project TEXT PRIMARY KEY NOT NULL, \
+                    invoiced INTEGER NOT NULL DEFAULT 1, \
+                    price NUMERIC NOT NULL DEFAULT 0.25, \
+                    kmTarget NUMERIC NOT NULL DEFAULT 300, \
+                    isTarget INTEGER NOT NULL DEFAULT 0, \
+                    projType TEXT NOT NULL DEFAULT 'car', \
+                    bgColor TEXT NOT NULL DEFAULT '#777777', \
+                    isComplete INTEGER NOT NULL DEFAULT 0 \
+                );");
+            tx.executeSql("\
+                CREATE INDEX IF NOT EXISTS proj ON km_proj ( \
+                    invoiced, \
                     project \
                 );");
+            tx.executeSql("\
+                CREATE INDEX IF NOT EXISTS projTp ON km_proj ( \
+                    projType, \
+                    project \
+                );");
+
+        }));
+    }
+    else {
+
+        try {
+            db.transaction(function(tx) {
+                tx.executeSql("\
+                    CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
+                        isComplete, \
+                        project \
+                    );");
+            });
+        } catch (err) {
+            console.log("create index projCompl error: " + err);
+        };
+
+        /*
+         * Set up view.
+         */
+
+        // DROP VIEW IF EXISTS
+        console.log("Set up views");
+        db.transaction(function(tx) {
+            var rs = tx.executeSql("\
+                DROP VIEW IF EXISTS allTrips;");
         });
-    } catch (err) {
-        console.log("create index projCompl error: " + err);
-    };
+        db.transaction(function(tx) {
+            var rs = tx.executeSql("\
+                DROP VIEW IF EXISTS showTotals;");
+        });
+        db.transaction(function(tx) {
+            var rs = tx.executeSql("\
+                DROP VIEW IF EXISTS showInvoices;");
+        });
 
-    /*
-     * Set up view.
-     */
+        db.version = "1.1";
 
-    // DROP VIEW IF EXISTS
-    console.log("Set up views");
-    db.transaction(function(tx) {
-        var rs = tx.executeSql("\
-            DROP VIEW IF EXISTS allTrips;");
-    });
-    db.transaction(function(tx) {
-        var rs = tx.executeSql("\
-            DROP VIEW IF EXISTS showTotals;");
-    });
-    db.transaction(function(tx) {
-        var rs = tx.executeSql("\
-            DROP VIEW IF EXISTS showInvoices;");
-    });
+    }
 
     console.log("initialization completed");
 }
@@ -194,30 +180,56 @@ function upgradeDatabase( dbversion )
 
     console.log("Current version: " + db.version + ", New version: " + dbversion);
 
-    if (db.version < dbversion )
+    if (db.version < "1.1" && dbversion >= "1.1" )
     {
-        db.changeVersion(db.version, dbversion, function (tx) {
-            newVersion = "1.1";
-            if (db.version < newVersion ) {
-                /*
-                 * Enables archiving a project.
-                 */
-                rs = tx.executeSql("ALTER TABLE km_proj ADD COLUMN isComplete INTEGER NOT NULL DEFAULT 0");
-                console.log(rs);
-                rs = tx.executeSql("\
-                        CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
-                            isComplete, \
-                            project \
-                        );");
-                console.log(rs);
-                rs = tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", newVersion]);
-                console.log("Tables altered 1.1");
-                db.version = "1.1";
-            }
+        db.changeVersion(db.version, "1.1", function (tx) {
+
+            /*
+             * Enables archiving a project.
+             */
+            rs = tx.executeSql("ALTER TABLE km_proj ADD COLUMN isComplete INTEGER NOT NULL DEFAULT 0");
+            console.log(rs);
+            rs = tx.executeSql("\
+                    CREATE INDEX IF NOT EXISTS projCompl ON km_proj ( \
+                        isComplete, \
+                        project \
+                    );");
+            console.log(rs);
+            rs = tx.executeSql('INSERT OR REPLACE INTO settings VALUES (?,?);', ["databaseVersion", newVersion]);
+            console.log("Tables altered 1.1");
+
             /*
              * Upgrade complete.
              */
         });
+    }
+}
+
+function cleanTablesRecs() {
+
+    if (databaseHandler === null)
+        deleteDatabase = 0
+    else
+        deleteDatabase = getSetting( "deleteDatabase" );
+
+    console.log("cleanTablesRecs ");
+    if (deleteDatabase) {
+        var db = databaseHandler || openDatabase();
+
+        db.transaction(function(tx) {
+                tx.executeSql("\
+                    DROP TABLE IF EXISTS \
+                        km_trip \
+                    ;");
+                tx.executeSql("\
+                    DROP TABLE IF EXISTS \
+                        km_proj \
+                    ;");
+        });
+
+        deleteDatabase = false
+        setSetting( "deleteDatabase", false )
+
     }
 }
 
